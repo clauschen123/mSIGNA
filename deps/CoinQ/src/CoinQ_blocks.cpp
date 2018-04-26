@@ -144,7 +144,8 @@ bool CoinQBlockTreeMem::insertHeader(const Coin::CoinBlockHeader& header, bool b
     parent.childHashes.insert(headerHash);
     notifyInsert(chainHeader);
 
-    if ((bReplaceTip && chainHeader.chainWork >= mTotalWork) || chainHeader.chainWork > mTotalWork)
+    //TODO claus
+//     if ((bReplaceTip && chainHeader.chainWork >= mTotalWork) || chainHeader.chainWork > mTotalWork)
     {
         setBestChain(chainHeader);
     }
@@ -274,7 +275,7 @@ void CoinQBlockTreeMem::loadFromFile(const std::string& filename, bool bCheckPro
 
     if (!boost::filesystem::is_regular_file(p)) throw BlockTreeInvalidFileTypeException();
 
-    const unsigned int RECORD_SIZE = MIN_COIN_BLOCK_HEADER_SIZE + 4;
+    const unsigned int RECORD_SIZE = MIN_BCO_BLOCK_HEADER_SIZE + 4;
     if (boost::filesystem::file_size(p) % RECORD_SIZE != 0) throw BlockTreeInvalidFileLengthException();
 
 #ifndef _WIN32
@@ -301,10 +302,10 @@ void CoinQBlockTreeMem::loadFromFile(const std::string& filename, bool bCheckPro
         unsigned int pos = 0;
         for (; pos <= nbytesread - RECORD_SIZE; pos += RECORD_SIZE)
         {
-            headerBytes.assign((unsigned char*)&buf[pos], (unsigned char*)&buf[pos + MIN_COIN_BLOCK_HEADER_SIZE]);
+            headerBytes.assign((unsigned char*)&buf[pos], (unsigned char*)&buf[pos + MIN_BCO_BLOCK_HEADER_SIZE]);
             header.setSerialized(headerBytes);
             hash = header.hash();
-            if (memcmp(&buf[pos + MIN_COIN_BLOCK_HEADER_SIZE], &hash[0], 4)) throw BlockTreeChecksumErrorException();
+            if (memcmp(&buf[pos + MIN_BCO_BLOCK_HEADER_SIZE], &hash[0], 4)) throw BlockTreeChecksumErrorException();
 
             try
             {
@@ -365,7 +366,7 @@ void CoinQBlockTreeMem::flushToFile(const std::string& filename)
             headerBytes = pHeader->getSerialized();
             hash = pHeader->hash();
 
-            fs.write((const char*)&headerBytes[0], MIN_COIN_BLOCK_HEADER_SIZE);
+            fs.write((const char*)&headerBytes[0], MIN_BCO_BLOCK_HEADER_SIZE);
             if (fs.bad()) throw BlockTreeFileWriteFailureException();
 
             fs.write((const char*)&hash[0], 4);

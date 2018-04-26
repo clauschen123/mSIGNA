@@ -59,7 +59,11 @@ const uint32_t MSG_TYPE_MASK        = 0xffffffff >> 2;
 #define MIN_TX_OUT_SIZE               9
 //#define MIN_TRANSACTION_SIZE         59
 #define MIN_TRANSACTION_SIZE         10 // blank transaction
-#define MIN_COIN_BLOCK_HEADER_SIZE   80
+
+#define MIN_BCO_BLOCK_HEADER_SIZE           96
+#define MIN_BITCOIN_BLOCK_HEADER_SIZE       80
+#define MIN_COIN_BLOCK_HEADER_SIZE(bco)     ( bco ? MIN_BCO_BLOCK_HEADER_SIZE : MIN_BITCOIN_BLOCK_HEADER_SIZE )
+
 #define MIN_COIN_BLOCK_SIZE         140
 #define MIN_MERKLE_BLOCK_SIZE        86
 #define MIN_FILTER_LOAD_SIZE         10
@@ -770,6 +774,7 @@ public:
 
     const char* getCommand() const { return ""; }
     uint64_t getSize() const { return 80; }
+    
     uchar_vector getSerialized() const;
     void setSerialized(const uchar_vector& bytes);
 
@@ -795,6 +800,8 @@ public:
     const uchar_vector& getPOWHash() const;
     const uchar_vector& getPOWHashLittleEndian() const;
 
+    bool IsBcoHeader()  const { return bcoHead_; }
+
 private:
     friend class CoinBlock;
     friend class MerkleBlock;
@@ -815,6 +822,7 @@ private:
 
     void resetHash() const { isHashSet_ = false; isPOWHashSet_ = false; }
 
+    bool bcoHead_ = false;
     uint32_t version_;
     uchar_vector prevBlockHash_;
     uchar_vector merkleRoot_;
@@ -883,6 +891,7 @@ public:
     uint32_t nTxs;
     std::vector<uchar_vector> hashes;
     uchar_vector flags;
+    bool bcoHead = false;
 
     MerkleBlock() { }
     MerkleBlock(const CoinBlockHeader& _blockHeader, uint32_t _nTxs, const std::vector<uchar_vector>& _hashes, const uchar_vector& _flags)

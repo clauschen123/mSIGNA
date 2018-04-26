@@ -1714,7 +1714,7 @@ uchar_vector CoinBlockHeader::getSerialized() const
 
 void CoinBlockHeader::setSerialized(const uchar_vector& bytes)
 {
-    if (bytes.size() < MIN_COIN_BLOCK_HEADER_SIZE)
+    if (bytes.size() < MIN_BITCOIN_BLOCK_HEADER_SIZE)
         throw runtime_error("Invalid data - CoinBlockHeader too small.");
 
     version_ = vch_to_uint<uint32_t>(bytes, LITTLE_ENDIAN_); uint pos = 4;
@@ -1730,7 +1730,12 @@ void CoinBlockHeader::setSerialized(const uchar_vector& bytes)
     size_t dis = sizeof(timestamp_);
     timestamp_ = vch_to_uint<uint32_t>(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + dis), LITTLE_ENDIAN_); pos += dis;
 
+    bcoHead_ = false;
     if (static_cast<int64_t>(timestamp_) >= BCO_BLOCK_UNIXTIME_MIN) {
+        bcoHead_ = true;
+        if (bytes.size() < MIN_BCO_BLOCK_HEADER_SIZE) 
+            return;
+
         dis = sizeof(bits_);
         bits_ = vch_to_uint<bits_t>(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + dis), LITTLE_ENDIAN_); pos += dis;
 
@@ -1904,7 +1909,7 @@ void CoinBlock::setSerialized(const uchar_vector& bytes)
         throw runtime_error("Invalid data - CoinBlock too small.");
 
     this->blockHeader.setSerialized(bytes);
-    uint pos = MIN_COIN_BLOCK_HEADER_SIZE;
+    uint pos = MIN_COIN_BLOCK_HEADER_SIZE(this->blockHeader.IsBcoHeader());
 
     MerkleTree txMerkleTree;
     VarInt count(uchar_vector(bytes.begin() + pos, bytes.end())); pos += count.getSize();
@@ -2023,7 +2028,7 @@ PartialMerkleTree MerkleBlock::merkleTree() const
 
 uint64_t MerkleBlock::getSize() const
 {
-    return MIN_COIN_BLOCK_HEADER_SIZE + 4 + VarInt(hashes.size()).getSize() + (hashes.size() * 32) + VarInt(flags.size()).getSize() + flags.size();
+    return MIN_COIN_BLOCK_HEADER_SIZE(bcoHead) + 4 + VarInt(hashes.size()).getSize() + (hashes.size() * 32) + VarInt(flags.size()).getSize() + flags.size();
 }
 
 uchar_vector MerkleBlock::getSerialized() const
@@ -2046,7 +2051,7 @@ void MerkleBlock::setSerialized(const uchar_vector& bytes)
         throw runtime_error("Invalid data - MerkleBlock too small.");
 
     this->blockHeader.setSerialized(bytes);
-    uint pos = MIN_COIN_BLOCK_HEADER_SIZE;
+    uint pos = MIN_COIN_BLOCK_HEADER_SIZE(this->blockHeader.IsBcoHeader());
 
     nTxs = vch_to_uint<uint32_t>(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + 4), LITTLE_ENDIAN_); pos += 4;
 
@@ -2121,7 +2126,13 @@ HeadersMessage::HeadersMessage(const string& hex)
 
 uint64_t HeadersMessage::getSize() const
 {
-    return VarInt(this->headers.size()).getSize() + this->headers.size()*(MIN_COIN_BLOCK_HEADER_SIZE + 1);
+    uint64_t totalSize = 0;
+    for (auto& h : headers)
+    {
+        totalSize += h.IsBcoHeader() ? MIN_BCO_BLOCK_HEADER_SIZE : MIN_BITCOIN_BLOCK_HEADER_SIZE;
+        totalSize += 1;
+    }
+    return VarInt(this->headers.size()).getSize() + totalSize /*this->headers.size()*(MIN_BCO_BLOCK_HEADER_SIZE + 1)*/;
 }
 
 uchar_vector HeadersMessage::getSerialized() const
@@ -2137,15 +2148,23 @@ uchar_vector HeadersMessage::getSerialized() const
 void HeadersMessage::setSerialized(const uchar_vector& bytes)
 {
     VarInt count(bytes);
-    if (bytes.size() < count.getSize() + count.value*(MIN_COIN_BLOCK_HEADER_SIZE + 1))
+    if (bytes.size() < count.getSize() + count.value*(MIN_BITCOIN_BLOCK_HEADER_SIZE + 1))
         throw runtime_error("Invalid data - HeadersMessage too small.");
 
     uint pos = count.getSize();
     this->headers.clear();
     for (uint i = 0; i < count.value; i++) {
-        CoinBlockHeader header(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + MIN_COIN_BLOCK_HEADER_SIZE));
-        this->headers.push_back(header);
-        pos += MIN_COIN_BLOCK_HEADER_SIZE + 1; // an extra blank byte is added.
+        // Try parse header. It may binary incompatible with BTC and BCO
+        CoinBlockHeader header(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + MIN_BITCOIN_BLOCK_HEADER_SIZE));
+        if (header.IsBcoHeader()) {
+            CoinBlockHeader header(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + MIN_BCO_BLOCK_HEADER_SIZE));
+            this->headers.push_back(header);
+            pos += MIN_BCO_BLOCK_HEADER_SIZE + 1; // an extra blank byte is added.
+        }
+        else {
+            this->headers.push_back(header);
+            pos += MIN_BITCOIN_BLOCK_HEADER_SIZE + 1; // an extra blank byte is added.
+        }
     }
 }
 

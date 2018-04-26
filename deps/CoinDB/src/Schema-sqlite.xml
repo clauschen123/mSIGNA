@@ -8,6 +8,9 @@
     <alter-table name="SigningScript">
       <add-column name="redeemscript" type="BLOB" null="false"/>
     </alter-table>
+    <alter-table name="BlockHeader">
+      <add-column name="plotseed" type="INTEGER" null="false"/>
+    </alter-table>
     <add-table name="TxIn_scriptwitnessstack" kind="container">
       <column name="object_id" type="INTEGER" null="false"/>
       <column name="index" type="INTEGER" null="false"/>

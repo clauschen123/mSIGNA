@@ -120,7 +120,10 @@ void Peer::do_read()
             {
                 Coin::CoinNodeMessage peerMessage(read_message);
 
-                if (!peerMessage.isChecksumValid()) throw std::runtime_error("Invalid checksum.");
+                if (!peerMessage.isChecksumValid()) {
+                    LOGGER(debug) << "ChecksumValid fail! " << command << std::endl;
+                    throw std::runtime_error("Invalid checksum.");
+                }
 
                 std::string command = peerMessage.getCommand();
                 if (command == "verack") {
