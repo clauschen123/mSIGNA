@@ -68,8 +68,8 @@ void NetworkSelector::select(const std::string& network_name)
 // Coins can be added here
 const CoinParams bitcoinParams(
     0xd9b4bef9ul,
-    70001,
-    "8333",
+    870015,  //70001,
+    "8833",   //"8333",
     0,
     5,
     5,
@@ -84,13 +84,17 @@ const CoinParams bitcoinParams(
     100000,
     &sha256_2,
     &sha256_2,
+
+    //genesis = CreateGenesisBlock(1231006505 /*nTime*/, 2083236893 /*nNonce*/, 0x1d00ffff /*nBits*/, 1 /*version*/, 50 * COIN);
+    //version, timestamp, bits, nonce , plotseed, prevBlockHash , merkleRoot
     Coin::CoinBlockHeader(
-        1,
-        1231006505,
-        486604799,
-        2083236893,
-        uchar_vector(32, 0),
-        uchar_vector("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
+        1,                      //version
+        1231006505,             //time
+        486604799,              //bits
+        2083236893,             //nonce
+        0,                      //plotseed
+        uchar_vector(32, 0),    //prevblock
+        uchar_vector("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")    //merkleroot
     ),
     true
 );
@@ -119,6 +123,7 @@ const CoinParams testnet3Params(
         1296688602,
         486604799,
         414098458,
+        0, //plotseed
         uchar_vector(32, 0),
         uchar_vector("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
     ),
@@ -149,6 +154,7 @@ const CoinParams litecoinParams(
         1317972665,
         0x1e0ffff0,
         2084524493,
+        0, //plotseed
         uchar_vector(32, 0),
         uchar_vector("97ddfbbae6be97fd6cdf3e7ca13232a3afff2353e29badfab7f73011edd4ced9")
     ),
@@ -179,6 +185,7 @@ const CoinParams ltcTestnet4Params(
         1486949366,
         0x1e0ffff0,
         293345,
+        0, //plotseed
         uchar_vector(32, 0),
         uchar_vector("97ddfbbae6be97fd6cdf3e7ca13232a3afff2353e29badfab7f73011edd4ced9")
     )
@@ -208,6 +215,7 @@ const CoinParams quarkcoinParams(
         1374408079,
         0x1e0fffff,
         12058113,
+        0, //plotseed
         uchar_vector(32, 0),
         uchar_vector("868b2fb28cb1a0b881480cc85eb207e29e6ae75cdd6d26688ed34c2d2d23c776")
     )

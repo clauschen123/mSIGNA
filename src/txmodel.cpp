@@ -243,8 +243,8 @@ void TxModel::update()
         // Add size and vsize
         std::shared_ptr<Tx> tx = vault->getTx(item.tx_id);
         Coin::Transaction core_tx = tx->toCoinCore();
-LOGGER(trace) << "Size: " << core_tx.getSize(true) << endl;
-LOGGER(trace) << "VSize: " << core_tx.getVSize() << endl;
+//         LOGGER(trace) << "Size: " << core_tx.getSize(true) << endl;
+//         LOGGER(trace) << "VSize: " << core_tx.getVSize() << endl;
         QStandardItem* sizeItem = new QStandardItem(QString::number(core_tx.getSize(true)));
         QStandardItem* vsizeItem = new QStandardItem(QString::number(core_tx.getVSize()));
         row.append(sizeItem);

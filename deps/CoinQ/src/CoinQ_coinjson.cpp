@@ -62,8 +62,9 @@ json_spirit::Object getHeaderJsonObject(const Coin::CoinBlockHeader& header)
     obj.push_back(json_spirit::Pair("prevblockhash", header.prevBlockHash.getHex()));
     obj.push_back(json_spirit::Pair("merkleroot", header.merkleRoot.getHex()));
     obj.push_back(json_spirit::Pair("timestamp", (uint64_t)header.timestamp));
-    obj.push_back(json_spirit::Pair("bits", (uint64_t)header.bits));
-    obj.push_back(json_spirit::Pair("nonce", (uint64_t)header.nonce));
+    obj.push_back(json_spirit::Pair("bits", (bits_t)header.bits));
+    obj.push_back(json_spirit::Pair("nonce", (nonce_t)header.nonce));
+    obj.push_back(json_spirit::Pair("plotseed", (plotseed_t)header.plotseed));
     return obj;
 }
 

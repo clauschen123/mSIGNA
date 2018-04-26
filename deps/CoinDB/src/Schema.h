@@ -925,8 +925,8 @@ public:
 
     BlockHeader(const Coin::CoinBlockHeader& blockheader, uint32_t height = 0xffffffff) { fromCoinCore(blockheader, height); }
 
-    BlockHeader(uint32_t version, const bytes_t& prevhash, const bytes_t& merkleroot, uint32_t timestamp, uint32_t bits, uint32_t nonce, uint32_t height = 0xffffffff)
-    : height_(height), version_(version), prevhash_(prevhash), merkleroot_(merkleroot), timestamp_(timestamp), bits_(bits), nonce_(nonce) { updateHash(); }
+    BlockHeader(uint32_t version, const bytes_t& prevhash, const bytes_t& merkleroot, uint32_t timestamp, Coin::bits_t bits, Coin::nonce_t nonce, Coin::plotseed_t plotseed, uint32_t height = 0xffffffff)
+    : height_(height), version_(version), prevhash_(prevhash), merkleroot_(merkleroot), timestamp_(timestamp), bits_(bits), nonce_(nonce), plotseed_(plotseed) { updateHash(); }
 
     void fromCoinCore(const Coin::CoinBlockHeader& blockheader, uint32_t height = 0xffffffff);
     Coin::CoinBlockHeader toCoinCore() const;
@@ -941,8 +941,9 @@ public:
     bytes_t prevhash() const { return prevhash_; }
     bytes_t merkleroot() const { return merkleroot_; }
     uint32_t timestamp() const { return timestamp_; }
-    uint32_t bits() const { return bits_; }
-    uint32_t nonce() const { return nonce_; }
+    Coin::bits_t bits() const { return bits_; }
+    Coin::nonce_t nonce() const { return nonce_; }
+    Coin::plotseed_t plotseed() const { return plotseed_; }
 
     std::string toJson() const;
 
@@ -962,8 +963,9 @@ private:
     bytes_t prevhash_;
     bytes_t merkleroot_;
     uint32_t timestamp_;
-    uint32_t bits_;
-    uint32_t nonce_;
+    Coin::bits_t bits_;
+    Coin::nonce_t nonce_;
+    Coin::plotseed_t plotseed_;
 
     void updateHash();
 

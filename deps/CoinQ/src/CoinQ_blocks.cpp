@@ -131,6 +131,9 @@ bool CoinQBlockTreeMem::insertHeader(const Coin::CoinBlockHeader& header, bool b
 /*    if (bCheckTimestamp && header.timestamp > time(NULL) + 2 * 60 * 60) {
         throw std::runtime_error("Timestamp too far in the future.");
     }*/
+    
+    //TODO claus
+    bCheckProofOfWork = false;
 
     // Check proof of work
     if (bCheckProofOfWork && BigInt(header.getPOWHashLittleEndian()) > header.getTarget()) throw std::runtime_error("Header hash is too big.");

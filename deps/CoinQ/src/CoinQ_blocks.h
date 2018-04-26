@@ -38,7 +38,9 @@ public:
 
     ChainHeader() : Coin::CoinBlockHeader(), inBestChain(false), height(-1), chainWork(0) { }
     ChainHeader(const Coin::CoinBlockHeader& header, bool _inBestChain = false, int _height = -1, const BigInt& _chainWork = 0) : Coin::CoinBlockHeader(header), inBestChain(_inBestChain), height(_height), chainWork(_chainWork) { }
-    ChainHeader(uint32_t _version, uint32_t _timestamp, uint32_t _bits, uint32_t _nonce = 0, const uchar_vector& _prevBlockHash = g_zero32bytes, const uchar_vector& _merkleRoot = g_zero32bytes, bool _inBestChain = false, int _height = -1, const BigInt& _chainWork = 0) : Coin::CoinBlockHeader(_version, _timestamp, _bits, _nonce, _prevBlockHash, _merkleRoot), inBestChain(_inBestChain), height(_height), chainWork(_chainWork) { }
+    ChainHeader(uint32_t _version, uint32_t _timestamp, Coin::bits_t _bits, Coin::nonce_t _nonce = 0, Coin::plotseed_t _plotseed = 0, const uchar_vector& _prevBlockHash = g_zero32bytes, const uchar_vector& _merkleRoot = g_zero32bytes, bool _inBestChain = false, int _height = -1, const BigInt& _chainWork = 0) 
+        : Coin::CoinBlockHeader(_version, _timestamp, _bits, _nonce, _plotseed, _prevBlockHash, _merkleRoot), inBestChain(_inBestChain), height(_height), chainWork(_chainWork) 
+    { }
 
     // TODO: add these operators for CoinClasses and compare directly instead of using hashes.
     bool operator==(const ChainHeader& rhs) const { return ((getHash() == rhs.getHash()) && (inBestChain == rhs.inBestChain) && (height == rhs.height) && (chainWork == rhs.chainWork)); }

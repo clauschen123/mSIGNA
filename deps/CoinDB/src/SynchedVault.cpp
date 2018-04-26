@@ -553,7 +553,7 @@ void SynchedVault::insertFakeMerkleBlock(unsigned int nExtraLeaves)
 
     std::shared_ptr<BlockHeader> header = m_vault->getBestBlockHeader();
 
-    Coin::MerkleBlock coinmerkleblock(Coin::randomPartialMerkleTree(txhashes, txhashes.size() + nExtraLeaves), header->version(), header->hash(), time(NULL), header->bits(), 0);
+    Coin::MerkleBlock coinmerkleblock(Coin::randomPartialMerkleTree(txhashes, txhashes.size() + nExtraLeaves), header->version(), header->hash(), time(NULL), header->bits(), 0, 0);
 
     lock.unlock();
     m_networkSync.insertMerkleBlock(coinmerkleblock, cointxs);

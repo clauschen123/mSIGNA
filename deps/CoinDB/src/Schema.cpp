@@ -702,11 +702,12 @@ void BlockHeader::fromCoinCore(const Coin::CoinBlockHeader& blockheader, uint32_
     timestamp_ = blockheader.timestamp();
     bits_ = blockheader.bits();
     nonce_ = blockheader.nonce();
+    plotseed_ = blockheader.plotseed();
 }
 
 Coin::CoinBlockHeader BlockHeader::toCoinCore() const
 {
-    return Coin::CoinBlockHeader(version_, timestamp_, bits_, nonce_, prevhash_, merkleroot_);
+    return Coin::CoinBlockHeader(version_, timestamp_, bits_, nonce_, plotseed_, prevhash_, merkleroot_);
 }
 
 std::string BlockHeader::toJson() const
@@ -720,14 +721,15 @@ std::string BlockHeader::toJson() const
        << "\"merkleroot\":\"" << uchar_vector(merkleroot_).getHex() << "\","
        << "\"timestamp\":" << timestamp_ << ","
        << "\"bits\":" << bits_ << ","
-       << "\"nonce\":" << nonce_
+       << "\"nonce\":" << nonce_ << ","
+       << "\"plotseed\":" << plotseed_
        << "}";
     return ss.str();
 }
 
 void BlockHeader::updateHash()
 {
-    hash_ = Coin::CoinBlockHeader(version_, timestamp_, bits_, nonce_, prevhash_, merkleroot_).hash();
+    hash_ = Coin::CoinBlockHeader(version_, timestamp_, bits_, nonce_, plotseed_, prevhash_, merkleroot_).hash();
 }
 
 

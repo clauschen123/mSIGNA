@@ -50,7 +50,7 @@ void Peer::do_handshake()
 
 void Peer::do_read()
 {
-    LOGGER(trace) << "Peer::do_read() - waiting for " << min_read_bytes << " bytes..." << endl;
+//     LOGGER(trace) << "Peer::do_read() - waiting for " << min_read_bytes << " bytes..." << endl;
     boost::asio::async_read(socket_, boost::asio::buffer(read_buffer, READ_BUFFER_SIZE),
         //boost::asio::transfer_at_least(MIN_MESSAGE_HEADER_SIZE),
         boost::asio::transfer_at_least(min_read_bytes),
@@ -107,8 +107,8 @@ void Peer::do_read()
 
             // Get payload size
             unsigned int payloadSize = vch_to_uint<uint32_t>(uchar_vector(read_message.begin() + 16, read_message.begin() + 20), LITTLE_ENDIAN_);
-            LOGGER(debug) << "Peer read handler - payload size: " << payloadSize << endl;
-            LOGGER(debug) << "Peer read handler - read_message size: " << read_message.size() << endl;
+//             LOGGER(debug) << "Peer read handler - payload size: " << payloadSize << endl;
+//             LOGGER(debug) << "Peer read handler - read_message size: " << read_message.size() << endl;
 
             if (read_message.size() < MIN_MESSAGE_HEADER_SIZE  + payloadSize)
             {
@@ -217,7 +217,7 @@ void Peer::do_read()
             }
 
             read_message.assign(read_message.begin() + MIN_MESSAGE_HEADER_SIZE + payloadSize, read_message.end());
-            LOGGER(debug) << "Peer read handler - remaining message bytes: " << read_message.size() << endl;
+//             LOGGER(debug) << "Peer read handler - remaining message bytes: " << read_message.size() << endl;
         }
 
         do_read();

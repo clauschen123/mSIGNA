@@ -723,18 +723,29 @@ private:
 class CoinBlock;
 class MerkleBlock;
 
+typedef uint64_t  bits_t;
+typedef uint64_t  nonce_t;
+typedef uint64_t  plotseed_t;
+
 class CoinBlockHeader : public CoinNodeStructure
 {
 public:
     CoinBlockHeader() : isPOWHashSet_(false) { }
-    CoinBlockHeader(uint32_t version, const uchar_vector& prevBlockHash, const uchar_vector& merkleRoot, uint32_t timestamp, uint32_t bits, uint32_t nonce)
-        : isPOWHashSet_(false), version_(version), prevBlockHash_(prevBlockHash), merkleRoot_(merkleRoot), timestamp_(timestamp), bits_(bits), nonce_(nonce) { }
-    CoinBlockHeader(uint32_t version, uint32_t timestamp, uint32_t bits, uint32_t nonce = 0, const uchar_vector& prevBlockHash = g_zero32bytes, const uchar_vector& merkleRoot = g_zero32bytes)
-        : isPOWHashSet_(false), version_(version), prevBlockHash_(prevBlockHash), merkleRoot_(merkleRoot), timestamp_(timestamp), bits_(bits), nonce_(nonce) { }
+    CoinBlockHeader(uint32_t version, const uchar_vector& prevBlockHash, const uchar_vector& merkleRoot, uint32_t timestamp, bits_t bits, nonce_t nonce, plotseed_t plotseed)
+        : isPOWHashSet_(false), version_(version), prevBlockHash_(prevBlockHash)
+        , merkleRoot_(merkleRoot), timestamp_(timestamp), bits_(bits)
+        , nonce_(nonce), plotseed_(plotseed) { }
+
+    CoinBlockHeader(uint32_t version, uint32_t timestamp, bits_t bits, nonce_t nonce = 0, plotseed_t plotseed = 0, const uchar_vector& prevBlockHash = g_zero32bytes, const uchar_vector& merkleRoot = g_zero32bytes)
+        : isPOWHashSet_(false), version_(version), prevBlockHash_(prevBlockHash)
+        , merkleRoot_(merkleRoot), timestamp_(timestamp)
+        , bits_(bits), nonce_(nonce), plotseed_(plotseed) 
+    { }
+
     CoinBlockHeader(const uchar_vector& bytes) { setSerialized(bytes); }
     CoinBlockHeader(const std::string& hex);
 
-    void set(uint32_t version, uint32_t timestamp, uint32_t bits, uint32_t nonce = 0, const uchar_vector& prevBlockHash = g_zero32bytes, const uchar_vector& merkleRoot = g_zero32bytes)
+    void set(uint32_t version, uint32_t timestamp, bits_t bits, nonce_t nonce = 0, plotseed_t plotseed = 0, const uchar_vector& prevBlockHash = g_zero32bytes, const uchar_vector& merkleRoot = g_zero32bytes)
     {
         isHashSet_ = false;
         isPOWHashSet_ = false;
@@ -745,6 +756,7 @@ public:
         timestamp_ = timestamp;
         bits_ = bits;
         nonce_ = nonce;
+        plotseed_ = plotseed;
     }
 
     const uchar_vector& hash() const { return getHashLittleEndian(); }
@@ -752,8 +764,9 @@ public:
     const uchar_vector&  prevBlockHash() const { return prevBlockHash_; }
     const uchar_vector& merkleRoot() const { return merkleRoot_; }
     uint32_t timestamp() const { return timestamp_; }
-    uint32_t bits() const { return bits_; }
-    uint32_t nonce() const { return nonce_; }
+    bits_t bits() const { return bits_; }
+    nonce_t nonce() const { return nonce_; }
+    plotseed_t plotseed() const { return plotseed_; }
 
     const char* getCommand() const { return ""; }
     uint64_t getSize() const { return 80; }
@@ -765,6 +778,8 @@ public:
 
     void nonce(uint32_t nonce) { nonce_ = nonce; isHashSet_ = false; isPOWHashSet_ = false; }
     void incrementNonce() { nonce_++; isHashSet_ = false; isPOWHashSet_ = false; }
+
+    void plotseed(plotseed_t plotseed) { plotseed_ = plotseed; }
 
     const BigInt getTarget() const;
     void setTarget(const BigInt& target);
@@ -804,8 +819,9 @@ private:
     uchar_vector prevBlockHash_;
     uchar_vector merkleRoot_;
     uint32_t timestamp_;
-    uint32_t bits_;
-    uint32_t nonce_;
+    bits_t bits_;
+    nonce_t nonce_;
+    plotseed_t plotseed_;
 };
 
 class CoinBlock : public CoinNodeStructure
@@ -821,7 +837,7 @@ public:
         : blockHeader(coinBlock.blockHeader), txs(coinBlock.txs) { }
     CoinBlock(uint32_t version, uint32_t timestamp, uint32_t bits, const uchar_vector& prevBlockHash = g_zero32bytes)
     {
-        this->blockHeader = CoinBlockHeader(version, timestamp, bits, 0, prevBlockHash);
+        this->blockHeader = CoinBlockHeader(version, timestamp, bits, 0, 0, prevBlockHash);
     }
     CoinBlock(const uchar_vector& bytes) { this->setSerialized(bytes); }
     CoinBlock(const std::string& hex);
@@ -873,7 +889,7 @@ public:
         : blockHeader(_blockHeader), nTxs(_nTxs), hashes(_hashes), flags(_flags) { }
     MerkleBlock(const MerkleBlock& merkleBlock)
         : blockHeader(merkleBlock.blockHeader), nTxs(merkleBlock.nTxs), hashes(merkleBlock.hashes), flags(merkleBlock.flags) { }
-    MerkleBlock(const PartialMerkleTree& merkleTree, uint32_t version, const uchar_vector& prevBlockHash, uint32_t timestamp, uint32_t bits, uint32_t nonce);
+    MerkleBlock(const PartialMerkleTree& merkleTree, uint32_t version, const uchar_vector& prevBlockHash, uint32_t timestamp, bits_t bits, nonce_t nonce, plotseed_t plotseed);
     explicit MerkleBlock(const uchar_vector& bytes) { setSerialized(bytes); }
 
     const uchar_vector& hash() const { return blockHeader.getHashLittleEndian(); }
@@ -881,8 +897,9 @@ public:
     const uchar_vector& prevBlockHash() const { return blockHeader.prevBlockHash(); }
     const uchar_vector& merkleRoot() const { return blockHeader.merkleRoot(); }
     uint32_t timestamp() const { return blockHeader.timestamp(); }
-    uint32_t bits() const { return blockHeader.bits(); }
-    uint32_t nonce() const { return blockHeader.nonce(); } 
+    bits_t bits() const { return blockHeader.bits(); }
+    nonce_t nonce() const { return blockHeader.nonce(); } 
+    plotseed_t plotseed() const { return blockHeader.plotseed(); }
 
     PartialMerkleTree merkleTree() const;
 

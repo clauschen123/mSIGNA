@@ -35,6 +35,9 @@ uchar_vector g_zero32bytes("0000000000000000000000000000000000000000000000000000
 unsigned char g_addressVersion = 0x00;
 unsigned char g_multiSigAddressVersion = 0x05;
 
+static const uint64_t BCO_FORK_BLOCK_HEIGHT = 501948 + 1; // 00000000000000000069c0ed50d118cef1e727cf5210fe1a7dddb835c752844e
+static const int64_t BCO_BLOCK_UNIXTIME_MIN = 1522396264; // 2018-03-30 15:51:04
+
 void SetAddressVersion(unsigned char version)
 {
     g_addressVersion = version;
@@ -1696,8 +1699,16 @@ uchar_vector CoinBlockHeader::getSerialized() const
     rval += prevBlockHash_.getReverse(); // all big endian
     rval += merkleRoot_.getReverse();
     rval += uint_to_vch(timestamp_, LITTLE_ENDIAN_);
-    rval += uint_to_vch(bits_, LITTLE_ENDIAN_);
-    rval += uint_to_vch(nonce_, LITTLE_ENDIAN_);
+
+    if (static_cast<int64_t>(timestamp_) >= BCO_BLOCK_UNIXTIME_MIN) {
+        rval += uint_to_vch(bits_, LITTLE_ENDIAN_);
+        rval += uint_to_vch(nonce_, LITTLE_ENDIAN_);
+        rval += uint_to_vch(plotseed_, LITTLE_ENDIAN_);
+    }
+    else {
+        rval += uint_to_vch<uint32_t>((uint32_t)bits_, LITTLE_ENDIAN_);
+        rval += uint_to_vch<uint32_t>((uint32_t)nonce_, LITTLE_ENDIAN_);
+    }
     return rval;
 }
 
@@ -1716,9 +1727,24 @@ void CoinBlockHeader::setSerialized(const uchar_vector& bytes)
     subbytes.reverse();
     merkleRoot_ = subbytes;
 
-    timestamp_ = vch_to_uint<uint32_t>(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + 4), LITTLE_ENDIAN_); pos += 4;
-    bits_ = vch_to_uint<uint32_t>(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + 4), LITTLE_ENDIAN_); pos += 4;
-    nonce_ = vch_to_uint<uint32_t>(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + 4), LITTLE_ENDIAN_); pos += 4;
+    size_t dis = sizeof(timestamp_);
+    timestamp_ = vch_to_uint<uint32_t>(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + dis), LITTLE_ENDIAN_); pos += dis;
+
+    if (static_cast<int64_t>(timestamp_) >= BCO_BLOCK_UNIXTIME_MIN) {
+        dis = sizeof(bits_);
+        bits_ = vch_to_uint<bits_t>(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + dis), LITTLE_ENDIAN_); pos += dis;
+
+        dis = sizeof(nonce_);
+        nonce_ = vch_to_uint<nonce_t>(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + dis), LITTLE_ENDIAN_); pos += dis;
+
+        dis = sizeof(plotseed_);
+        plotseed_ = vch_to_uint<plotseed_t>(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + dis), LITTLE_ENDIAN_); pos += dis;
+    }
+    else {
+        dis = sizeof(uint32_t);
+        bits_ = vch_to_uint<uint32_t>(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + dis), LITTLE_ENDIAN_); pos += dis;
+        nonce_ = vch_to_uint<uint32_t>(uchar_vector(bytes.begin() + pos, bytes.begin() + pos + dis), LITTLE_ENDIAN_); pos += dis;
+    }
 
     resetHash();
 }
@@ -1780,7 +1806,7 @@ string CoinBlockHeader::toString() const
     stringstream ss;
     ss << "hash: " << getHashLittleEndian().getHex() << ", version: " << version_ << ", prevBlockHash: " << prevBlockHash_.getHex()
        << ", merkleRoot: " << merkleRoot_.getHex() << ", timestamp: " << timeToString(timestamp_)
-       << ", bits: " << bits_ << ", nonce: " << nonce_;
+       << ", bits: " << bits_ << ", nonce: " << nonce_ << ", plotseed: " << plotseed_;
     return ss.str();
 }
 
@@ -1788,12 +1814,13 @@ string CoinBlockHeader::toIndentedString(uint spaces) const
 {
     stringstream ss;
     ss << blankSpaces(spaces) << "hash: " << getHashLittleEndian().getHex() << endl
-       << blankSpaces(spaces) << "version: " << dec << version_ << endl
-       << blankSpaces(spaces) << "prevBlockHash: " << prevBlockHash_.getHex() << endl
-       << blankSpaces(spaces) << "merkleRoot: " << merkleRoot_.getHex() << endl
-       << blankSpaces(spaces) << "timestamp: 0x" << hex << timestamp_ << " (" << timeToString(timestamp_) << ")" << endl
-       << blankSpaces(spaces) << "bits: " << dec << bits_ << endl
-       << blankSpaces(spaces) << "nonce: " << dec << nonce_;
+        << blankSpaces(spaces) << "version: " << dec << version_ << endl
+        << blankSpaces(spaces) << "prevBlockHash: " << prevBlockHash_.getHex() << endl
+        << blankSpaces(spaces) << "merkleRoot: " << merkleRoot_.getHex() << endl
+        << blankSpaces(spaces) << "timestamp: 0x" << hex << timestamp_ << " (" << timeToString(timestamp_) << ")" << endl
+        << blankSpaces(spaces) << "bits: " << dec << bits_ << endl
+        << blankSpaces(spaces) << "nonce: " << dec << nonce_ << endl
+        << blankSpaces(spaces) << "plotseed: " << dec << plotseed_ << endl;
     return ss.str();
 }
 
@@ -1980,9 +2007,9 @@ int64_t CoinBlock::getHeight() const
 //
 // class MerkleBlock implementation
 //
-MerkleBlock::MerkleBlock(const PartialMerkleTree& merkleTree, uint32_t version, const uchar_vector& prevBlockHash, uint32_t timestamp, uint32_t bits, uint32_t nonce)
+MerkleBlock::MerkleBlock(const PartialMerkleTree& merkleTree, uint32_t version, const uchar_vector& prevBlockHash, uint32_t timestamp, bits_t bits, nonce_t nonce, plotseed_t plotseed)
 {
-    blockHeader = CoinBlockHeader(version, prevBlockHash, merkleTree.getRootLittleEndian(), timestamp, bits, nonce);
+    blockHeader = CoinBlockHeader(version, prevBlockHash, merkleTree.getRootLittleEndian(), timestamp, bits, nonce, plotseed);
 
     nTxs = merkleTree.getNTxs();
     hashes = merkleTree.getMerkleHashesVector();
