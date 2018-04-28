@@ -1614,7 +1614,7 @@ uchar_vector Transaction::getSigHash(uint32_t hashType, uint index, const uchar_
         throw runtime_error("Index out of range.");
 
     // TODO: Add other hashtype support
-    if (hashType != SIGHASH_ALL)
+    if (hashType != SIGHASH_ALL && hashType != (SIGHASH_ALL | SIGHASH_FORKID_BCO)) 
         throw runtime_error("Unsupported hash type.");
 
     if (inputs[index].scriptWitness.isEmpty())
@@ -1626,14 +1626,20 @@ uchar_vector Transaction::getSigHash(uint32_t hashType, uint index, const uchar_
             if (index == i) { copy.inputs[i].scriptSig = script; }
             else            { copy.inputs[i].scriptSig.clear();  }
         }
-        return sha256_2(copy.getSerialized(false) + uint_to_vch(hashType, LITTLE_ENDIAN_));
+        if (hashType & SIGHASH_FORKID_BCO) {
+            uint8_t size = 3;
+            return sha256_2(copy.getSerialized(false) + uint_to_vch(hashType, LITTLE_ENDIAN_) 
+                + uint_to_vch(size, LITTLE_ENDIAN_)   + vector<unsigned char>{'b', 'c', 'o'});
+        }
+        else {
+            return sha256_2(copy.getSerialized(false) + uint_to_vch(hashType, LITTLE_ENDIAN_));
+        }
     }
 
     if (hashPrevouts.empty())
     {
         uchar_vector ss;
         for (auto& input: inputs) { ss += input.previousOut.getSerialized(); }
-//        std::cout << "prevouts: " << ss.getHex() << std::endl;
         hashPrevouts = sha256_2(ss);
     }
 
@@ -1641,7 +1647,6 @@ uchar_vector Transaction::getSigHash(uint32_t hashType, uint index, const uchar_
     {
         uchar_vector ss;
         for (auto& input: inputs) { ss += uint_to_vch(input.sequence, LITTLE_ENDIAN_); }
-//        std::cout << "sequence: " << ss.getHex() << std::endl;
         hashSequence = sha256_2(ss);
     }
 
@@ -1649,7 +1654,6 @@ uchar_vector Transaction::getSigHash(uint32_t hashType, uint index, const uchar_
     {
         uchar_vector ss;
         for (auto& output: outputs) { ss += output.getSerialized(); }
-//        std::cout << "outputs: " << ss.getHex() << std::endl;
         hashOutputs = sha256_2(ss);
     }
 
@@ -1665,7 +1669,12 @@ uchar_vector Transaction::getSigHash(uint32_t hashType, uint index, const uchar_
     ss += hashOutputs;
     ss += uint_to_vch(lockTime, LITTLE_ENDIAN_);
     ss += uint_to_vch(hashType, LITTLE_ENDIAN_);
-//    std::cout << "data to hash: " << ss.getHex() << std::endl;
+    if (hashType & SIGHASH_FORKID_BCO)
+    {
+        uint8_t size = 3;
+        ss += uint_to_vch(size, LITTLE_ENDIAN_);
+        ss += vector<unsigned char>{'b', 'c', 'o'};
+    }
     return sha256_2(ss);
 }
 

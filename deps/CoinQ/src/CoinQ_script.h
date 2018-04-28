@@ -204,6 +204,8 @@ enum SigHashType {
     SIGHASH_ALL             = 0x01,
     SIGHASH_NONE            = 0x02,
     SIGHASH_SINGLE          = 0x03,
+    SIGHASH_FORKID_BCO      = 0x10, // Signature hash flag for BCO
+    SIGHASH_FORKID_BCOGOD   = 0x20, // Signature hash flag for BCO god mode
     SIGHASH_ANYONECANPAY    = 0x80
 };
 
