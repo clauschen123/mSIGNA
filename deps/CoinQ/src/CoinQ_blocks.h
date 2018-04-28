@@ -156,6 +156,10 @@ protected:
     bool setBestChain(ChainHeader& header);
     bool unsetBestChain(ChainHeader& header);
 
+    bool checkPowHeader(const Coin::CoinBlockHeader& header);
+    bool checkPocHeader(const ChainHeader& parent, const Coin::CoinBlockHeader& header);
+    const ChainHeader* getPrevHeader(const uchar_vector&);
+
 public:
     CoinQBlockTreeMem(bool _bCheckTimestamp = true, bool _bCheckProofOfWork = true)
         : bFlushed(true), mBestHeight(-1), mTotalWork(0), pHead(NULL), bCheckTimestamp(_bCheckTimestamp), bCheckProofOfWork(_bCheckProofOfWork) { }

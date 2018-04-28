@@ -73,6 +73,12 @@ const uint32_t MSG_TYPE_MASK        = 0xffffffff >> 2;
 #define BLOOM_UPDATE P2PUBKEY_ONLY    2
 #define BLOOM_UPDATE_MASK             3
 
+// BCO params
+#define BCO_FORK_BLOCK_HEIGHT         (501948 + 1) // 00000000000000000069c0ed50d118cef1e727cf5210fe1a7dddb835c752844e
+#define BCO_BLOCK_UNIXTIME_MIN        1522396264 // 2018-03-30 15:51:04
+#define BCOInitBlockCount              757
+
+
 const char* itemTypeToString(uint itemType);
 
 std::string timeToString(time_t time);

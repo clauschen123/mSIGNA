@@ -12,7 +12,8 @@ OBJS = \
     obj/CoinQ_txs.o \
     obj/CoinQ_keys.o \
     obj/CoinQ_filter.o \
-    obj/BlockchainDownload.o
+    obj/BlockchainDownload.o \
+    obj/poc.o
 
 LIBS = \
     -lCoinQ \

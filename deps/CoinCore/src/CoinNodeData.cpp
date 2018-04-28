@@ -35,9 +35,6 @@ uchar_vector g_zero32bytes("0000000000000000000000000000000000000000000000000000
 unsigned char g_addressVersion = 0x00;
 unsigned char g_multiSigAddressVersion = 0x05;
 
-static const uint64_t BCO_FORK_BLOCK_HEIGHT = 501948 + 1; // 00000000000000000069c0ed50d118cef1e727cf5210fe1a7dddb835c752844e
-static const int64_t BCO_BLOCK_UNIXTIME_MIN = 1522396264; // 2018-03-30 15:51:04
-
 void SetAddressVersion(unsigned char version)
 {
     g_addressVersion = version;
@@ -1818,9 +1815,15 @@ const BigInt CoinBlockHeader::getWork() const
 string CoinBlockHeader::toString() const
 {
     stringstream ss;
-    ss << "hash: " << getHashLittleEndian().getHex() << ", version: " << version_ << ", prevBlockHash: " << prevBlockHash_.getHex()
-       << ", merkleRoot: " << merkleRoot_.getHex() << ", timestamp: " << timeToString(timestamp_)
-       << ", bits: " << bits_ << ", nonce: " << nonce_ << ", plotseed: " << plotseed_;
+    ss  << "Block header:"
+        << "    \n  hash: " << getHashLittleEndian().getHex()
+        << "    \n  version: " << version_
+        << "    \n  prevBlockHash: " << prevBlockHash_.getHex()
+        << "    \n  merkleRoot: " << merkleRoot_.getHex()
+        << "    \n  timestamp: " << timeToString(timestamp_)
+        << "    \n  bits: " << bits_
+        << "    \n  nonce: " << nonce_
+        << "    \n  plotseed: " << plotseed_;
     return ss.str();
 }
 

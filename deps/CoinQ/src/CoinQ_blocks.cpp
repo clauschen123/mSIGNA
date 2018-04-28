@@ -10,8 +10,10 @@
 //
 
 #include "CoinQ_blocks.h"
+#include "poc.h"
 
 #include <logger/logger.h>
+#include <functional>
 
 using namespace CoinQ;
 
@@ -113,6 +115,40 @@ void CoinQBlockTreeMem::setGenesisBlock(const Coin::CoinBlockHeader& header)
     notifyAddBestChain(header);
 }
 
+bool CoinQBlockTreeMem::checkPowHeader(const Coin::CoinBlockHeader& header)
+{
+    if (BigInt(header.getPOWHashLittleEndian()) > header.getTarget())
+        throw std::runtime_error("Header hash is too big.");
+    return true;
+}
+
+bool CoinQBlockTreeMem::checkPocHeader(const ChainHeader& parent, const Coin::CoinBlockHeader& header)
+{
+    int blockHeight = parent.height+1;
+    if(blockHeight >= BCO_FORK_BLOCK_HEIGHT) 
+    {
+        if (!poc::VerifyGenerationSignature(parent, header, std::bind(&CoinQBlockTreeMem::getPrevHeader, this, std::placeholders::_1))) {
+            LOGGER(debug) << "__DEADLINE: " << poc::getCurDeadline() << ",Height:"<< blockHeight << "\n";
+            LOGGER(debug) << header.toString() << "\n";
+            throw std::runtime_error("Poc header check invalid.");
+        }
+        return true;
+    }
+    else if(blockHeight >= 0) 
+    {
+        return checkPowHeader(header);
+    }
+    throw std::runtime_error("block height invalid");
+}
+
+const ChainHeader* CoinQBlockTreeMem::getPrevHeader(const uchar_vector& hash)
+{
+    header_hash_map_t::iterator it = mHeaderHashMap.find(hash);
+    if (it == mHeaderHashMap.end()) return nullptr;
+
+    return &it->second;
+}
+
 bool CoinQBlockTreeMem::insertHeader(const Coin::CoinBlockHeader& header, bool bCheckProofOfWork, bool bReplaceTip)
 {
     if (mHeaderHashMap.size() == 0) throw std::runtime_error("No genesis block.");
@@ -128,15 +164,20 @@ bool CoinQBlockTreeMem::insertHeader(const Coin::CoinBlockHeader& header, bool b
     // TODO: Check version, compute work required.
 
     // Check timestamp
-/*    if (bCheckTimestamp && header.timestamp > time(NULL) + 2 * 60 * 60) {
+    /* if (bCheckTimestamp && header.timestamp > time(NULL) + 2 * 60 * 60) {
         throw std::runtime_error("Timestamp too far in the future.");
     }*/
     
-    //TODO claus
-    bCheckProofOfWork = false;
-
     // Check proof of work
-    if (bCheckProofOfWork && BigInt(header.getPOWHashLittleEndian()) > header.getTarget()) throw std::runtime_error("Header hash is too big.");
+    if (bCheckProofOfWork)
+    {
+        if (header.IsBcoHeader()) { 
+            if (!checkPocHeader(parent,header)) return false;
+        }
+        else { //bitcoin
+            if (!checkPowHeader(header)) return false;
+        }
+    }
 
     ChainHeader& chainHeader = mHeaderHashMap[headerHash] = header;
     chainHeader.height = parent.height + 1;
@@ -145,7 +186,7 @@ bool CoinQBlockTreeMem::insertHeader(const Coin::CoinBlockHeader& header, bool b
     notifyInsert(chainHeader);
 
     //TODO claus
-//     if ((bReplaceTip && chainHeader.chainWork >= mTotalWork) || chainHeader.chainWork > mTotalWork)
+    // if ((bReplaceTip && chainHeader.chainWork >= mTotalWork) || chainHeader.chainWork > mTotalWork)
     {
         setBestChain(chainHeader);
     }

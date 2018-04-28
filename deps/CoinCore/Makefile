@@ -11,7 +11,11 @@ OBJS = \
         obj/BloomFilter.o \
         obj/MerkleTree.o \
         obj/secp256k1_openssl.o \
-        obj/aes.o
+        obj/aes.o \
+        obj/shabal256.o \
+        obj/utilstrencodings.o \
+        obj/arith_uint256.o \
+        obj/btc_uint256.o
 
 OBJ_HEADERS = \
         src/Base58Check.h \
@@ -23,12 +27,15 @@ OBJ_HEADERS = \
         src/numericdata.h \
         src/random.h \
         src/typedefs.h \
-        src/uint256.h
+        src/uint256.h \
+        src/btc_uint256.h \
+        src/arith_uint256.h 
 
 SCRYPT_OBJS = \
 	src/scrypt/obj/scrypt.o
 
 HASH9_OBJS = \
+	src/hashfunc/obj/shabal.o \
 	src/hashfunc/obj/blake.o \
 	src/hashfunc/obj/bmw.o \
 	src/hashfunc/obj/groestl.o \
