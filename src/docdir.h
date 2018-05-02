@@ -16,4 +16,7 @@
 #include <QString>
 
 const QString& getDocDir();
+const QString& getVaultFile();
+
 void setDocDir(const QString& dir);
+void setVaultFile(const QString& file);

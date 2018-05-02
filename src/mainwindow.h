@@ -68,6 +68,7 @@ public:
     };
 
     void loadHeaders();
+    void loadVault();
     void tryConnect();
     bool isConnected() const { return networkState >= NETWORK_STATE_STARTED; }
     bool isSynched() const { return networkState == NETWORK_STATE_SYNCHED; }
@@ -300,7 +301,7 @@ private:
     QAction* importVaultAction;
     QAction* exportVaultAction;
     QAction* exportPublicVaultAction;
-    QAction* closeVaultAction;
+//     QAction* closeVaultAction;
 
     // keychain actions
     QAction* newKeychainAction;

@@ -13,14 +13,11 @@
 
 #include "docdir.h"
 
-QString docDir;
+static QString docDir;
+static QString valutFile;
 
-const QString& getDocDir()
-{
-    return docDir;
-}
+const QString& getDocDir()          { return docDir; }
+const QString& getVaultFile()       { return valutFile; }
 
-void setDocDir(const QString& dir)
-{
-    docDir = dir;
-}
+void setDocDir(const QString& dir)      { docDir = dir; }
+void setVaultFile(const QString& file)  { valutFile = file; }

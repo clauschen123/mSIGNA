@@ -289,6 +289,21 @@ void MainWindow::loadHeaders()
     emit updateBestHeight(synchedVault.getBestHeight());
 }
 
+void MainWindow::loadVault()
+{
+    auto vaultFile = getVaultFile();
+    if (vaultFile.size() == 0) {
+        LOGGER(trace) << "Last vault file is empty." << endl;
+        return;
+    }
+    QString fullFile = getDocDir() + "/" + vaultFile;
+
+    LOGGER(trace) << "Load last vault file:" << fullFile.toStdString() << endl;
+    synchedVault.openVault(fullFile.toStdString(), false, SCHEMA_VERSION, getCoinParams().network_name(), false);
+
+    updateVaultStatus(fullFile);
+}
+
 void MainWindow::tryConnect()
 {
     if (!autoConnect) return;
@@ -408,7 +423,7 @@ void MainWindow::updateVaultStatus(const QString& name)
     importVaultAction->setEnabled(isOpen);
     exportVaultAction->setEnabled(isOpen);
     exportPublicVaultAction->setEnabled(isOpen);
-    closeVaultAction->setEnabled(isOpen);
+//     closeVaultAction->setEnabled(isOpen);
 
     // keychain actions
     newKeychainAction->setEnabled(isOpen);
@@ -516,10 +531,15 @@ void MainWindow::newVault(QString fileName)
             getDocDir(),
             tr("Vaults (*.vault)"));
     }
+    //TODO claus
+//     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+//         "/home",
+//         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
     if (fileName.isEmpty()) return;
 
     QFileInfo fileInfo(fileName);
     setDocDir(fileInfo.dir().absolutePath());
+    setVaultFile(fileInfo.fileName());
     saveSettings();
 
     try
@@ -574,6 +594,7 @@ void MainWindow::openVault(QString fileName)
 
     QFileInfo fileInfo(fileName);
     setDocDir(fileInfo.dir().absolutePath());
+    setVaultFile(fileInfo.fileName());
     saveSettings();
 
     try
@@ -2211,10 +2232,10 @@ void MainWindow::createActions()
     exportPublicVaultAction->setEnabled(false);
     connect(exportPublicVaultAction, &QAction::triggered, [=]() { this->exportVault(QString(), true); });
 
-    closeVaultAction = new QAction(QIcon(":/icons/closevault.png"), tr("Close Vault"), this);
-    closeVaultAction->setStatusTip(tr("Close vault"));
-    closeVaultAction->setEnabled(false);
-    connect(closeVaultAction, SIGNAL(triggered()), this, SLOT(closeVault()));
+//     closeVaultAction = new QAction(QIcon(":/icons/closevault.png"), tr("Close Vault"), this);
+//     closeVaultAction->setStatusTip(tr("Close vault"));
+//     closeVaultAction->setEnabled(false);
+//     connect(closeVaultAction, SIGNAL(triggered()), this, SLOT(closeVault()));
 
     // keychain actions
     newKeychainAction = new QAction(QIcon(":/icons/keypair.png"), tr("New &Keychain..."), this);
@@ -2475,7 +2496,7 @@ void MainWindow::createMenus()
     fileMenu->addAction(openVaultAction);
     recentsMenu = fileMenu->addMenu(QIcon(":/icons/open_recent_32x32.png"), tr("Open Recent"));
 
-    fileMenu->addAction(closeVaultAction);
+//     fileMenu->addAction(closeVaultAction);
     fileMenu->addSeparator();
     fileMenu->addAction(importVaultAction);
     fileMenu->addAction(exportVaultAction);
@@ -2591,7 +2612,7 @@ void MainWindow::createToolBars()
     fileToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     fileToolBar->addAction(newVaultAction);
     fileToolBar->addAction(openVaultAction);
-    fileToolBar->addAction(closeVaultAction);
+//     fileToolBar->addAction(closeVaultAction);
 
     accountToolBar = addToolBar(tr("Accounts"));
     accountToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
@@ -2657,6 +2678,9 @@ void MainWindow::loadSettings()
 #endif
 
         setDocDir(settings.value("lastvaultdir", getDefaultSettings().getDocumentDir()).toString());
+        setVaultFile(settings.value("lastvaultfile", "").toString());
+
+        LOGGER(trace) << "blockTreeFile: " << blockTreeFile.toStdString() << endl;
     }
 }
 
@@ -2681,6 +2705,7 @@ void MainWindow::saveSettings()
         settings.setValue("useoldaddressversions", useOldAddressVersions);
 #endif
         settings.setValue("lastvaultdir", getDocDir());
+        settings.setValue("lastvaultfile", getVaultFile());
     }
 }
 

@@ -85,18 +85,18 @@ int main(int argc, char* argv[])
     try {
         // Allow selecting a different network than bitcoin at startup.
         // If passed argument is an existing file, don't treat it as a network name.
-        if (argc > 1)
-        {
-            if (std::string(argv[1]) == "select")
-            {
-                selectNetwork("");
-            }
-            else if (std::string(argv[1]) == "network")
-            {
-                if (argc < 3) throw std::runtime_error("No network name specified.");
-                selectNetwork(argv[2]);
-            }
-        }
+//         if (argc > 1)
+//         {
+//             if (std::string(argv[1]) == "select")
+//             {
+//                 selectNetwork("");
+//             }
+//             else if (std::string(argv[1]) == "network")
+//             {
+//                 if (argc < 3) throw std::runtime_error("No network name specified.");
+//                 selectNetwork(argv[2]);
+//             }
+//         }
         getDefaultSettings();
         setCurrencyUnit();
     }
@@ -155,6 +155,10 @@ int main(int argc, char* argv[])
     splash.showProgressMessage("Loading block headers...");
     app.processEvents();
     mainWin.loadHeaders();
+
+    // Auto open the last vault
+    splash.showProgressMessage("Loading vault...");
+    mainWin.loadVault();
 
     // Require splash screen to always remain open for at least a couple seconds
     bool waiting = true;

@@ -81,7 +81,7 @@ void TxActions::updateCurrentTx(const QModelIndex& current, const QModelIndex& /
         copyRawTxToClipboardAction->setEnabled(true);
         saveRawTxToFileAction->setEnabled(true);
         viewRawTxAction->setEnabled(true);
-        viewTxOnWebAction->setEnabled(type == CoinDB::Tx::PROPAGATED || type == CoinDB::Tx::CONFIRMED);
+//         viewTxOnWebAction->setEnabled(type == CoinDB::Tx::PROPAGATED || type == CoinDB::Tx::CONFIRMED);
         deleteTxAction->setEnabled(type != CoinDB::Tx::CONFIRMED);
     }
     else {
@@ -93,7 +93,7 @@ void TxActions::updateCurrentTx(const QModelIndex& current, const QModelIndex& /
         copyRawTxToClipboardAction->setEnabled(false);
         saveRawTxToFileAction->setEnabled(false);
         viewRawTxAction->setEnabled(false);
-        viewTxOnWebAction->setEnabled(false);
+//         viewTxOnWebAction->setEnabled(false);
         deleteTxAction->setEnabled(false);
     }
 
@@ -598,9 +598,9 @@ void TxActions::createActions()
     insertRawTxFromFileAction->setEnabled(false);
     connect(insertRawTxFromFileAction, SIGNAL(triggered()), this, SLOT(insertRawTxFromFile()));
 
-    viewTxOnWebAction = new QAction(tr("View At Blockchain.info"), this);
-    viewTxOnWebAction->setEnabled(false);
-    connect(viewTxOnWebAction, SIGNAL(triggered()), this, SLOT(viewTxOnWeb()));
+//     viewTxOnWebAction = new QAction(tr("View At Blockchain.info"), this);
+//     viewTxOnWebAction->setEnabled(false);
+//     connect(viewTxOnWebAction, SIGNAL(triggered()), this, SLOT(viewTxOnWeb()));
 
     deleteTxAction = new QAction(tr("Delete Transaction"), this);
     deleteTxAction->setEnabled(false);
@@ -649,7 +649,7 @@ void TxActions::createMenus()
     //menu->addAction(saveRawTxToFileAction);
     //menu->addAction(insertRawTxFromFileAction);
     menu->addSeparator();
-    menu->addAction(viewTxOnWebAction);
+//     menu->addAction(viewTxOnWebAction);
     menu->addSeparator();
     menu->addAction(searchTxAction);
     menu->addSeparator();

@@ -103,7 +103,7 @@ private:
     QAction* insertRawTxFromClipboardAction;
     QAction* saveRawTxToFileAction;
     QAction* insertRawTxFromFileAction;
-    QAction* viewTxOnWebAction;
+//     QAction* viewTxOnWebAction;
     QAction* deleteTxAction;
 
     QMenu* menu;
