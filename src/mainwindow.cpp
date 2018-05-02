@@ -252,7 +252,7 @@ MainWindow::MainWindow() :
     // status updates
     connect(this, &MainWindow::status, [this](const QString& message) { updateStatusMessage(message); });
     connect(this, &MainWindow::updateSyncHeight, [this](int height) {
-        LOGGER(debug) << "MainWindow::updateBestHeight emitted. New best height: " << height << std::endl;
+        LOGGER(debug) << "MainWindow::updateSyncHeight emitted. New best height: " << height << std::endl;
         syncHeight = height;
         updateSyncLabel();
     });

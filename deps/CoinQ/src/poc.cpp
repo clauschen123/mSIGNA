@@ -19,10 +19,6 @@ namespace poc {
     /** Burst max target */
     static const uint64_t MAX_BASE_TARGET = 18325193796L;
 
-    static uint64_t __deadline__ = 0;
-
-    uint64_t getCurDeadline() { return __deadline__; }
-
     uint64_t CalculateBaseTarget(const ChainHeader& prev, const Coin::CoinBlockHeader &block, FGetPrevBlock getPrevBlock)
     {
         assert(prev.height + 1 >= BCO_FORK_BLOCK_HEIGHT);
@@ -130,12 +126,12 @@ namespace poc {
         btc_uint256 result;
 
         Coin::plotseed_t plotseed = prevBlock.plotseed();
-        const uchar_vector& merkleRoot = prevBlock.merkleRoot();
-        
-        btc_uint256 prevMerkle(merkleRoot);
+        uchar_vector merkleRoot = prevBlock.merkleRoot();
+
+        merkleRoot.reverse();
 
         CShabal256()
-            .Write((const unsigned char*)prevMerkle.begin(), prevMerkle.size())
+            .Write((const unsigned char*)merkleRoot.data(), merkleRoot.size())
             .Write((const unsigned char*)&plotseed, sizeof(plotseed))
             .Finalize((unsigned char*)result.begin());
         return result;
@@ -163,12 +159,12 @@ namespace poc {
         const uint64_t addr = htobe64( block.plotseed());
         const uint64_t nonce = htobe64(block.nonce());
         
-        if (prev.height == 502706) {
-            LOGGER(trace) << "\n   genSig:" << genSig.GetHex() ;
-            LOGGER(trace) << "\n   scopeNum:" << scopeNum ;
-            LOGGER(trace) << "\n   addr:" << addr ;
-            LOGGER(trace) << "\n   nonce:" << nonce ;
-        }
+//         if (prev.height == 502706) {
+//             LOGGER(trace) << "\n   genSig:" << genSig.GetHex() ;
+//             LOGGER(trace) << "\n   scopeNum:" << scopeNum ;
+//             LOGGER(trace) << "\n   addr:" << addr ;
+//             LOGGER(trace) << "\n   nonce:" << nonce ;
+//         }
 
         std::unique_ptr<uint8_t> _gendata(new uint8_t[PLOT_SIZE + 16]);
         uint8_t *const gendata = _gendata.get();
@@ -185,9 +181,9 @@ namespace poc {
                 .Write((const unsigned char*)gendata + i, len)
                 .Finalize((unsigned char*)temp.begin());
 
-            if (prev.height == 502706 && i== PLOT_SIZE) {
-                LOGGER(trace) << "\n   for i="<<i<<"  temp:" << temp.GetHex() ;
-            }
+//             if (prev.height == 502706 && i== PLOT_SIZE) {
+//                 LOGGER(trace) << "\n   for i=" << i << "  temp:" << temp.GetHex() ;
+//             }
 
             memcpy((uint8_t*)gendata + i - HASH_SIZE, (const uint8_t*)temp.begin(), HASH_SIZE);
         }
@@ -195,9 +191,9 @@ namespace poc {
         CShabal256()
             .Write((const unsigned char*)gendata, PLOT_SIZE + 16)
             .Finalize((unsigned char*)base.begin());
-        if (prev.height == 502706) {
-            LOGGER(trace) << "\n   base:" << base.GetHex() ;
-        }
+//         if (prev.height == 502706) {
+//             LOGGER(trace) << "\n   base:" << base.GetHex() ;
+//         }
 
         uint8_t data[PLOT_SIZE];
         for (int i = 0; i < PLOT_SIZE; i++) {
@@ -210,9 +206,10 @@ namespace poc {
             .Write((const unsigned char*)data + scopeNum * SCOOP_SIZE, SCOOP_SIZE)
             .Finalize((unsigned char*)base.begin());
 
-        if (prev.height == 502706) {
-            LOGGER(trace) << "\n   base:" << base.GetHex() << ", prev bits:" << prev.bits() ;
-        }
+//         if (prev.height == 502706) {
+//             LOGGER(trace) << "\n   base:" << base.GetHex() << ", prev bits:" << prev.bits() ;
+//             LOGGER(trace) << "\n   result:" << base.GetUint64(0) / prev.bits();
+//         }
 
         return base.GetUint64(0) / prev.bits();
     }
@@ -229,8 +226,8 @@ namespace poc {
             return true;
         }
 
-        /*uint64_t*/ __deadline__ = CalculateDeadline(prev, block);
-        return block.timestamp() > prev.timestamp() + __deadline__;
+        uint64_t deadline = CalculateDeadline(prev, block);
+        return block.timestamp() > prev.timestamp() + deadline;
     }
 
 }

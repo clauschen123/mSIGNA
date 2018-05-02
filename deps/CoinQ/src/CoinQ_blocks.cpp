@@ -128,8 +128,7 @@ bool CoinQBlockTreeMem::checkPocHeader(const ChainHeader& parent, const Coin::Co
     if(blockHeight >= BCO_FORK_BLOCK_HEIGHT) 
     {
         if (!poc::VerifyGenerationSignature(parent, header, std::bind(&CoinQBlockTreeMem::getPrevHeader, this, std::placeholders::_1))) {
-            LOGGER(debug) << "__DEADLINE: " << poc::getCurDeadline() << ",Height:"<< blockHeight << "\n";
-            LOGGER(debug) << header.toString() << "\n";
+            LOGGER(debug) << header.toString() << ",Height:" << blockHeight << "\n";
             throw std::runtime_error("Poc header check invalid.");
         }
         return true;
@@ -185,11 +184,14 @@ bool CoinQBlockTreeMem::insertHeader(const Coin::CoinBlockHeader& header, bool b
     parent.childHashes.insert(headerHash);
     notifyInsert(chainHeader);
 
-    //TODO claus
-    // if ((bReplaceTip && chainHeader.chainWork >= mTotalWork) || chainHeader.chainWork > mTotalWork)
-    {
+    if (!header.IsBcoHeader()) {
+        if ((bReplaceTip && chainHeader.chainWork >= mTotalWork) || chainHeader.chainWork > mTotalWork)
+            setBestChain(chainHeader);
+    }
+    else {
         setBestChain(chainHeader);
     }
+
 
     bFlushed = false;
     return true;
