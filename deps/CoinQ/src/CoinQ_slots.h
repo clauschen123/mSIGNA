@@ -15,6 +15,7 @@
 #include <functional>
 
 #include <CoinCore/CoinNodeData.h>
+#include <CoinCore/typedefs.h>
 
 // slot types
 typedef std::function<void()>                                       void_slot_t;
@@ -26,6 +27,6 @@ typedef std::function<void(const Coin::HeadersMessage&)>            headers_slot
 typedef std::function<void(const Coin::CoinBlock&)>                 block_slot_t;
 typedef std::function<void(const Coin::Transaction&)>               tx_slot_t;
 typedef std::function<void(const Coin::AddrMessage&)>               addr_slot_t;
-
+typedef std::function<void(uint32_t, bytes_t&)>                     blockheader_validate_t;
 #endif // _COINQ_SLOTS_H_
 

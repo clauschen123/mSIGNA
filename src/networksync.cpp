@@ -75,7 +75,7 @@ NetworkSync::NetworkSync()
     });
 
     peer.subscribeHeaders([&](CoinQ::Peer& peer, const Coin::HeadersMessage& headers) {
-        std::cout << "Received headers message..." << std::endl;
+        //std::cout << "Received headers message..." << std::endl;
         try {
             if (headers.headers.size() > 0) {
                 for (auto& item: headers.headers) {
@@ -91,10 +91,10 @@ NetworkSync::NetworkSync()
                     }
                 }
 
-                std::cout << "Processed " << headers.headers.size() << " headers."
-                     << " mBestHeight: " << blockTree.getBestHeight()
-                     << " mTotalWork: " << blockTree.getTotalWork().getDec()
-                     << " Attempting to fetch more headers..." << std::endl;
+//                 std::cout << "Processed " << headers.headers.size() << " headers."
+//                      << " mBestHeight: " << blockTree.getBestHeight()
+//                      << " mTotalWork: " << blockTree.getTotalWork().getDec()
+//                      << " Attempting to fetch more headers..." << std::endl;
                 emit status(tr("Best Height: ") + QString::number(blockTree.getBestHeight()) + " / " + tr("Total Work: ") + QString::fromStdString(blockTree.getTotalWork().getDec()));
                 peer.getHeaders(blockTree.getLocatorHashes(1));
             }

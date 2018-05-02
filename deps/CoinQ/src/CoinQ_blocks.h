@@ -105,7 +105,7 @@ public:
     // returns true if new header added, false if header already exists
     // throws runtime_error if header invalid or parent not known
 //    virtual bool insertHeader(const Coin::CoinBlockHeader& header) = 0;
-    virtual bool insertHeader(const Coin::CoinBlockHeader& header, bool bCheckProofOfWork, bool bReplaceTip) = 0;
+    virtual bool insertHeader(const Coin::CoinBlockHeader& header, bool bCheckProofOfWork, bool bReplaceTip, std::function<void(uint32_t height, bytes_t& hash)>) = 0;
 
     // returns true if header removed, false if header unknown
     virtual bool deleteHeader(const uchar_vector& hash) = 0;
@@ -180,7 +180,7 @@ public:
 
     void setGenesisBlock(const Coin::CoinBlockHeader& header);
     bool isEmpty() const { return pHead == nullptr; }
-    bool insertHeader(const Coin::CoinBlockHeader& header, bool bCheckProofOfWork = true, bool bReplaceTip = false);
+    bool insertHeader(const Coin::CoinBlockHeader& header, bool bCheckProofOfWork = true, bool bReplaceTip = false, std::function<void(uint32_t height, bytes_t& hash)> = nullptr);
     bool deleteHeader(const uchar_vector& hash);
 
     bool hasHeader(const uchar_vector& hash) const;

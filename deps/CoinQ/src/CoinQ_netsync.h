@@ -130,6 +130,7 @@ public:
     void subscribeAddBestChain(chain_header_slot_t slot) { notifyAddBestChain.connect(slot); }
     void subscribeRemoveBestChain(chain_header_slot_t slot) { notifyRemoveBestChain.connect(slot); }
     void subscribeBlockTreeChanged(void_slot_t slot) { notifyBlockTreeChanged.connect(slot); }
+    void subscribeBlockHeaderValidate(blockheader_validate_t slot) { notifyBlockHeaderValidate.connect(slot); }
 
 private:
     CoinQ::CoinParams m_coinParams;
@@ -215,6 +216,7 @@ private:
     CoinQSignal<const ChainHeader&> notifyAddBestChain;
     CoinQSignal<const ChainHeader&> notifyRemoveBestChain;
     CoinQSignal<void> notifyBlockTreeChanged;
+    CoinQSignal<uint32_t, bytes_t&> notifyBlockHeaderValidate;
 };
 
     }

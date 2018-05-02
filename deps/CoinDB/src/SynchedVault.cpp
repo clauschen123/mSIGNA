@@ -292,6 +292,11 @@ SynchedVault::SynchedVault(const CoinQ::CoinParams& coinParams) :
         m_bBlockTreeSynched = false;
         updateBestHeader(m_networkSync.getBestHeight(), m_networkSync.getBestHash());
     });
+
+    m_networkSync.subscribeBlockHeaderValidate([this](uint32_t height, bytes_t& hash)
+    {
+        updateBestHeader(height, hash);
+    });
 }
 
 // Destructor

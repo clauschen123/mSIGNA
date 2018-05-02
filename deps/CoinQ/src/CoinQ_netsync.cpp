@@ -163,12 +163,21 @@ NetworkSync::NetworkSync(const CoinQ::CoinParams& coinParams, bool bCheckProofOf
             if (headersMessage.headers.size() > 0)
             {
                 notifySynchingHeaders();
+                std::clock_t start = std::clock();
                 boost::unique_lock<boost::mutex> fileFlushLock(m_fileFlushMutex);
                 for (auto& item: headersMessage.headers)
                 {
                     try
                     {
-                        if (m_blockTree.insertHeader(item)) { m_bHeadersSynched = false; }
+                        if (m_blockTree.insertHeader(item, true, false, [&](uint32_t height,bytes_t& hash) {
+                            std::clock_t now = std::clock();
+                            if (height > 0 && now - start > 1000 ) {
+                                start = now;
+                                notifyBlockHeaderValidate(height, hash);
+                            }
+                        })) {
+                            m_bHeadersSynched = false; 
+                        }
                     }
                     catch (const std::exception& e)
                     {
@@ -187,6 +196,7 @@ NetworkSync::NetworkSync(const CoinQ::CoinParams& coinParams, bool bCheckProofOf
                                 << " Attempting to fetch more headers..." << std::endl;
 
                 notifyBlockTreeChanged();
+
                 std::stringstream status;
                 status << "Best Height: " << m_blockTree.getBestHeight() << " / " << "Total Work: " << m_blockTree.getTotalWork().getDec();
                 notifyStatus(status.str());

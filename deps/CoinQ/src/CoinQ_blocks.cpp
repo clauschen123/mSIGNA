@@ -127,10 +127,13 @@ bool CoinQBlockTreeMem::checkPocHeader(const ChainHeader& parent, const Coin::Co
     int blockHeight = parent.height+1;
     if(blockHeight >= BCO_FORK_BLOCK_HEIGHT) 
     {
+        //auto start = std::clock();
         if (!poc::VerifyGenerationSignature(parent, header, std::bind(&CoinQBlockTreeMem::getPrevHeader, this, std::placeholders::_1))) {
             LOGGER(debug) << header.toString() << ",Height:" << blockHeight << "\n";
             throw std::runtime_error("Poc header check invalid.");
         }
+        //LOGGER(trace) << "Height:" << blockHeight <<" use " << (std::clock() - start) << "\n";
+
         return true;
     }
     else if(blockHeight >= 0) 
@@ -148,7 +151,7 @@ const ChainHeader* CoinQBlockTreeMem::getPrevHeader(const uchar_vector& hash)
     return &it->second;
 }
 
-bool CoinQBlockTreeMem::insertHeader(const Coin::CoinBlockHeader& header, bool bCheckProofOfWork, bool bReplaceTip)
+bool CoinQBlockTreeMem::insertHeader(const Coin::CoinBlockHeader& header, bool bCheckProofOfWork, bool bReplaceTip, std::function<void(uint32_t height, bytes_t& hash)> notifyHandler)
 {
     if (mHeaderHashMap.size() == 0) throw std::runtime_error("No genesis block.");
 
@@ -192,6 +195,7 @@ bool CoinQBlockTreeMem::insertHeader(const Coin::CoinBlockHeader& header, bool b
         setBestChain(chainHeader);
     }
 
+    if (notifyHandler) notifyHandler(header.IsBcoHeader() ? chainHeader.height : 0, headerHash);
 
     bFlushed = false;
     return true;
