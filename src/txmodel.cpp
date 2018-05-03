@@ -74,9 +74,9 @@ void TxModel::setColumns()
         << (tr("Balance") + " (" + getCurrencySymbol() + ")")
         << tr("Confirmations")
         << tr("Address")
-        << tr("Transaction Hash")
-        << tr("Size")
-        << tr("VSize");
+        << tr("Transaction Hash");
+//         << tr("Size")
+//         << tr("VSize");
     setHorizontalHeaderLabels(columns);
 }
 
@@ -103,8 +103,8 @@ void TxModel::setAccount(const QString& accountName)
 class SortableRow
 {
 public:
-    SortableRow(const QList<QStandardItem*>& row, int status, uint32_t nConfirmations, int64_t value, uint32_t txindex) :
-        row_(row), status_(status), nConfirmations_(nConfirmations), value_(value), txindex_(txindex) { }
+    SortableRow(const QList<QStandardItem*>& row, int status, uint32_t nConfirmations, int64_t value, uint32_t txindex, uint32_t txtimestamp) :
+        row_(row), status_(status), nConfirmations_(nConfirmations), value_(value), txindex_(txindex), txtimestamp_(txtimestamp) { }
 
     QList<QStandardItem*>& row() { return row_; }
 
@@ -112,6 +112,7 @@ public:
     uint32_t nConfirmations() const { return nConfirmations_; }
     int64_t value() const { return value_; }
     uint32_t txindex() const { return txindex_; }
+    uint32_t txtimestamp() const { return txtimestamp_; }
 
 private:
     QList<QStandardItem*> row_;
@@ -120,6 +121,7 @@ private:
     uint32_t nConfirmations_;
     int64_t value_;
     uint32_t txindex_;
+    uint32_t txtimestamp_;
 };
 
 void TxModel::update()
@@ -147,7 +149,8 @@ void TxModel::update()
 
         QDateTime utc;
         utc.setTime_t(item.tx_timestamp);
-        QString time = utc.toLocalTime().toString();
+        //QString time = utc.toLocalTime().toString();
+        QString time = utc.toString(Qt::SystemLocaleShortDate);
 
         QString description = QString::fromStdString(item.role_label());
 
@@ -241,19 +244,24 @@ void TxModel::update()
         row.append(hashItem);
 
         // Add size and vsize
-        std::shared_ptr<Tx> tx = vault->getTx(item.tx_id);
-        Coin::Transaction core_tx = tx->toCoinCore();
+//         std::shared_ptr<Tx> tx = vault->getTx(item.tx_id);
+//         Coin::Transaction core_tx = tx->toCoinCore();
 //         LOGGER(trace) << "Size: " << core_tx.getSize(true) << endl;
 //         LOGGER(trace) << "VSize: " << core_tx.getVSize() << endl;
-        QStandardItem* sizeItem = new QStandardItem(QString::number(core_tx.getSize(true)));
-        QStandardItem* vsizeItem = new QStandardItem(QString::number(core_tx.getVSize()));
-        row.append(sizeItem);
-        row.append(vsizeItem);
+//         QStandardItem* sizeItem = new QStandardItem(QString::number(core_tx.getSize(true)));
+//         QStandardItem* vsizeItem = new QStandardItem(QString::number(core_tx.getVSize()));
+//         row.append(sizeItem);
+//         row.append(vsizeItem);
 
-        rows.append(SortableRow(row, item.tx_status, nConfirmations, value, item.tx_index));
+        rows.append(SortableRow(row, item.tx_status, nConfirmations, value, item.tx_index, item.tx_timestamp));
     }
 
     qSort(rows.begin(), rows.end(), [](const SortableRow& a, const SortableRow& b) {
+
+        // order by timestamp first
+        if (a.txtimestamp() < b.txtimestamp()) return false;
+        if (a.txtimestamp() > b.txtimestamp()) return true;
+
         // order by status first (unsigned, then propagated, then confirmed)
         if (a.status() < b.status()) return true;
         if (a.status() > b.status()) return false;
