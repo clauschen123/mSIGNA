@@ -97,12 +97,13 @@ const CoinParams bco_params(
         uchar_vector("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")    //merkleroot
     ),
     {   
+//         "127.0.0.1",
 //         "192.168.0.102",
 //         "spv.seed-bco.nanvann.top",
 //         "spv.seed-bco.bitcoinore.org",
         "spv.seed0-bco.bitcoinore.org",
-//         "spv.seed1-bco.bitcoinore.org",
-//         "spv.seed2-bco.bitcoinore.org" 
+        "spv.seed1-bco.bitcoinore.org",
+        "spv.seed2-bco.bitcoinore.org" 
     },
     true
 );

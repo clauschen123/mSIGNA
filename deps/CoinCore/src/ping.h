@@ -199,7 +199,6 @@ public:
     {
         io_service_.run();
         return ping_intval();
-
     }
 
 private:
@@ -232,10 +231,13 @@ private:
 
     void handle_timeout(const boost::system::error_code& err)
     {
-//         posix_time::ptime now = posix_time::microsec_clock::universal_time();
-//         std::cout << "handle_timeout,err " << (err ? "true " : "false ") << now << std::endl;
-
-        if (!should_end()) {
+        if (!err) {
+            ping_intval_ = std::numeric_limits<time_t>::max();
+            ping_count_ = 1;
+            // If timeout,dont retry
+            io_service_.stop();
+        }
+        else if (!should_end()) {
             // Requests must be sent no less than one second apart.
             timer_.expires_at(time_sent_ + posix_time::seconds(1));
             timer_.async_wait(boost::bind(&pinger::start_send, this));
@@ -272,13 +274,12 @@ private:
             && icmp_hdr.sequence_number() == sequence_number_)
         {
             // If this is the first reply, interrupt the five second timeout.
-            posix_time::ptime now = posix_time::microsec_clock::universal_time();
-//             std::cout << "num_replies=" << num_replies_ << ", now=" << now << std::endl;
 
             ++num_replies_;
             timer_.cancel();
 
             // Print out some information about the reply packet.
+            posix_time::ptime now = posix_time::microsec_clock::universal_time();
             int64_t this_intval = (now - time_sent_).total_microseconds();
             ping_intval_ += this_intval;
 

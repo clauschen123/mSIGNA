@@ -208,6 +208,7 @@ private slots:
 
     /////////////////////
     // NETWORK OPERATIONS
+    void findBestHost();
     void startSeedDns();
     void startNetworkSync();
     void stopNetworkSync();

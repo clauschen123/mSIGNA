@@ -397,6 +397,8 @@ void MainWindow::updateNetworkState(network_state_t newState)
         case NETWORK_STATE_STOPPED:
             networkStateLabel->setPixmap(*stoppedIcon);
             emit signal_refreshAccounts();
+            //TODO claus
+            startNetworkSync();
             break;
         case NETWORK_STATE_STARTED:
         case NETWORK_STATE_SYNCHING:
@@ -460,7 +462,8 @@ void MainWindow::updateVaultStatus(const QString& name)
 void MainWindow::showError(const QString& errorMsg)
 {
     updateStatusMessage(tr("Operation failed"));
-    QMessageBox::critical(this, tr("Error"), errorMsg);
+    // If network connect error,do not show the box, auto try connect another
+    //QMessageBox::critical(this, tr("Error"), errorMsg);
 }
 
 void MainWindow::showUpdate(const QString& updateMsg)
@@ -2038,52 +2041,77 @@ void MainWindow::connectionClosed()
     emit status(tr("Connection closed"));
 }
 
+void MainWindow::findBestHost()
+{
+    static std::vector<net::CNetAddr> vecAddr;
+    
+    // ping the last host first
+    string hostStr = host.toStdString();
+    if (!hostStr.empty())
+    {
+        LOGGER(trace) << "ping last " << hostStr << " ..." << endl;
+        time_t thisPing = pinger(hostStr.c_str()).detect();
+        LOGGER(trace) << "ping last " << hostStr << " result=" << (double)thisPing / 1000.0 << " ms" << endl;
+        if (thisPing <= 20000)
+            return;
+    }
+
+    // DNS search
+    if (vecAddr.empty())
+    {
+        const CoinQ::SeedParams& seeds = CoinQ::getBcoParams().get_seeds();
+        for (auto& seed : seeds) {
+            LOGGER(trace) << "Lookup Host: " << seed << endl;
+            net::LookupHost(seed.c_str(), vecAddr, 0, true);
+        }
+    }
+
+    int i = 0, selected = 0;
+    time_t pingVal = std::numeric_limits<time_t>::max();
+    LOGGER(trace) << "Address num=" << vecAddr.size() << endl;
+    // ping the IP list, get the fast one
+    for (net::CNetAddr& addr : vecAddr) {
+        string hostStr = addr.ToStringIP();
+
+        LOGGER(trace) << "ping " << hostStr << " ..." << endl;
+        time_t thisPing = pinger(hostStr.c_str()).detect();
+        LOGGER(trace) << "ping " << hostStr << " result=" << (double)thisPing / 1000.0 << " ms" << endl;
+
+        if (thisPing <= 10000) { selected = i; break; }
+        if (thisPing < pingVal) { selected = i; pingVal = thisPing; }
+        ++i;
+    }
+    host = QString::fromStdString(vecAddr[selected].ToString());
+
+    // Delete the host since we try connect 
+    auto it = vecAddr.begin();
+    advance(it, selected);
+    vecAddr.erase(it);
+}
+
 void MainWindow::startSeedDns()
 {
     try {
-        int found = 0;
-        const CoinQ::SeedParams& seeds = CoinQ::getBcoParams().get_seeds();
-        std::vector<net::CNetAddr> vIPs;
-        for (auto& seed : seeds) {
-            LOGGER(trace) << "Lookup Host: " << seed << endl;
+        findBestHost();
 
-            if (net::LookupHost(seed.c_str(), vIPs, 0, true))
-            {
-                for (const net::CNetAddr& ip : vIPs)
-                {
-                    LOGGER(trace) << "  Find IP: " << ip.ToStringIP() << endl;
-                    found++;
-                }
-            }
-        }
-
-        int i = 0, selected = 0;
-        time_t pingVal = std::numeric_limits<time_t>::max();
-        for (net::CNetAddr& ip : vIPs) {
-            string hostStr = ip.ToStringIP();
-            LOGGER(trace) << "ping " << hostStr << " ..." << endl;
-            time_t thisPing = pinger(hostStr.c_str()).detect();
-            LOGGER(trace) << "ping " << hostStr << " result=" << thisPing / 1000 << "ms" << endl;
-
-            if (thisPing < pingVal)
-                selected = i;
-            ++i;
-        }
-
-        QString ip = QString::fromStdString(vIPs[selected].ToString());
-        QString message(tr("Connecting to ") + ip + ":" + QString::number(port) + "...");
+        QString message(tr("Connecting to ") + host + ":" + QString::number(port) + "...");
         updateStatusMessage(message);
         //networkStarted();
-        synchedVault.startSync(ip.toStdString(), port);
+        synchedVault.startSync(host.toStdString(), port);
     }
     catch (const exception& e) {
-        LOGGER(debug) << "MainWindow::startNetworkSync - " << e.what() << std::endl;
+        LOGGER(debug) << "MainWindow::startSeedDns - " << e.what() << std::endl;
         showError(e.what());
     }
+    LOGGER(trace) << "MainWindow::startSeedDns exit " << std::endl;
 }
 
 void MainWindow::startNetworkSync()
 {
+    if (m_dnsThread.joinable()) {
+        LOGGER(trace) << "Dns thread running, waiting exit..." << endl;
+        m_dnsThread.join();
+    }
     m_dnsThread = boost::thread(boost::bind(&MainWindow::startSeedDns,this));
     LOGGER(trace) << "Dns thread started." << endl;
 }
@@ -2708,7 +2736,7 @@ void MainWindow::loadSettings()
         showTrailingDecimals = settings.value("showtrailingdecimals", true).toBool();
         setTrailingDecimals(showTrailingDecimals);
         blockTreeFile = settings.value("blocktreefile", getDefaultSettings().getDataDir() + "/blocktree.dat").toString();
-        host = settings.value("host", "localhost").toString();
+        host = settings.value("host", "").toString();
         port = settings.value("port", getCoinParams().default_port()).toInt();
         autoConnect = settings.value("autoconnect", false).toBool();
 #ifdef SUPPORT_OLD_ADDRESS_VERSIONS

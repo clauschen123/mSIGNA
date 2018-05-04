@@ -175,6 +175,7 @@ int main(int argc, char* argv[])
     mainWin.show();
     splash.finish(&mainWin);
 
+    //TODO claus
     if (!mainWin.isLicenseAccepted()) {
         //Display license agreement
         AcceptLicenseDialog acceptLicenseDialog;
