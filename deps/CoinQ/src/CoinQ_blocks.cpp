@@ -362,7 +362,7 @@ void CoinQBlockTreeMem::loadFromFile(const std::string& filename, bool bCheckPro
                     if (count % 10000 == 0)
                     {
                         if (callback && !callback(*this)) throw BlockTreeLoadInterruptedException();
-                        LOGGER(debug) << "CoinQBlockTreeMem::loadFromFile() - header hash: " << header.hash().getHex() << " height: " << count << std::endl;
+                        // LOGGER(debug) << "CoinQBlockTreeMem::loadFromFile() - header hash: " << header.hash().getHex() << " height: " << count << std::endl;
                     }
                     count++;
                 }

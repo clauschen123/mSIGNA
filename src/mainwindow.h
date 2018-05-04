@@ -43,6 +43,7 @@ class RequestPaymentDialog;
 #include <QMainWindow>
 
 #include <vector>
+#include <boost/thread.hpp>
 
 enum fontsize_t { SMALL_FONTS , MEDIUM_FONTS , LARGE_FONTS };
 
@@ -207,6 +208,7 @@ private slots:
 
     /////////////////////
     // NETWORK OPERATIONS
+    void startSeedDns();
     void startNetworkSync();
     void stopNetworkSync();
     void promptSync();
@@ -255,6 +257,7 @@ private:
     QString curFile;
     QString currencyUnitPrefix;
     bool showTrailingDecimals;
+    boost::thread m_dnsThread;
 
     //void updateBestHeight(int newHeight);
 
@@ -352,11 +355,11 @@ private:
     QString host;
     int port;
     bool autoConnect;
-    QAction* connectAction;
-    QAction* shortConnectAction;
-    QAction* disconnectAction;
-    QAction* shortDisconnectAction;
-    QAction* networkSettingsAction;
+//     QAction* connectAction;
+//     QAction* shortConnectAction;
+//     QAction* disconnectAction;
+//     QAction* shortDisconnectAction;
+//     QAction* networkSettingsAction;
 
     // network sync state
     network_state_t networkState;

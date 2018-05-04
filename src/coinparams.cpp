@@ -18,7 +18,7 @@
 #ifdef DEFAULT_NETWORK_LITECOIN
 #define DEFAULT_NETWORK "litecoin"
 #else
-#define DEFAULT_NETWORK "bitcoin"
+#define DEFAULT_NETWORK "bco"
 #endif
 
 QString getDefaultNetwork() { return DEFAULT_NETWORK; }

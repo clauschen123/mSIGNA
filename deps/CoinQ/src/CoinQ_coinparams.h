@@ -16,9 +16,12 @@
 #include <CoinCore/CoinNodeData.h>
 
 #include <vector>
+#include <string>
 #include <map>
 
 namespace CoinQ {
+
+typedef std::vector<std::string> SeedParams;
 
 class CoinParams
 {
@@ -44,6 +47,7 @@ public:
         Coin::hashfunc_t block_header_hash_function,
         Coin::hashfunc_t block_header_pow_hash_function,
         const Coin::CoinBlockHeader& genesis_block,
+        const SeedParams& seeds,
         bool segwit_enabled = false) :
     magic_bytes_(magic_bytes),
     protocol_version_(protocol_version),
@@ -63,6 +67,7 @@ public:
     block_header_hash_function_(block_header_hash_function),
     block_header_pow_hash_function_(block_header_pow_hash_function),
     genesis_block_(genesis_block),
+    seeds_(seeds),
     segwit_enabled_(segwit_enabled)
     {
         address_versions_[0] = pay_to_pubkey_hash_version_;
@@ -97,30 +102,32 @@ public:
     Coin::hashfunc_t                block_header_hash_function() const { return block_header_hash_function_; }
     Coin::hashfunc_t                block_header_pow_hash_function() const { return block_header_pow_hash_function_; }
     const Coin::CoinBlockHeader&    genesis_block() const { return genesis_block_; }
+    const CoinQ::SeedParams&        get_seeds() const { return seeds_; }
     bool                            segwit_enabled() const { return segwit_enabled_; }
 
 private:
-    uint32_t                magic_bytes_;
-    uint32_t                protocol_version_;
-    const char*             default_port_;
-    uint8_t                 pay_to_pubkey_hash_version_;
-    uint8_t                 pay_to_script_hash_version_;
-    uint8_t                 old_pay_to_script_hash_version_;
-    uint8_t                 pay_to_witness_pubkey_hash_version_;
-    uint8_t                 pay_to_witness_script_hash_version_;
-    uint8_t                 privkey_version_;
-    unsigned char           address_versions_[2];
-    const char*             network_name_;
-    const char*             url_prefix_;
-    uint64_t                currency_divisor_;
-    const char*             currency_symbol_;
-    uint64_t                currency_max_;
-    uint64_t                default_fee_;
-    unsigned int            currency_decimals_;
-    Coin::hashfunc_t        block_header_hash_function_;
-    Coin::hashfunc_t        block_header_pow_hash_function_;
-    Coin::CoinBlockHeader   genesis_block_;
-    bool                    segwit_enabled_;
+    uint32_t                 magic_bytes_;
+    uint32_t                 protocol_version_;
+    const char*              default_port_;
+    uint8_t                  pay_to_pubkey_hash_version_;
+    uint8_t                  pay_to_script_hash_version_;
+    uint8_t                  old_pay_to_script_hash_version_;
+    uint8_t                  pay_to_witness_pubkey_hash_version_;
+    uint8_t                  pay_to_witness_script_hash_version_;
+    uint8_t                  privkey_version_;
+    unsigned char            address_versions_[2];
+    const char*              network_name_;
+    const char*              url_prefix_;
+    uint64_t                 currency_divisor_;
+    const char*              currency_symbol_;
+    uint64_t                 currency_max_;
+    uint64_t                 default_fee_;
+    unsigned int             currency_decimals_;
+    Coin::hashfunc_t         block_header_hash_function_;
+    Coin::hashfunc_t         block_header_pow_hash_function_;
+    Coin::CoinBlockHeader    genesis_block_;
+    SeedParams               seeds_;
+    bool                     segwit_enabled_;
 };
 
 typedef std::pair<std::string, const CoinParams&> NetworkPair;
@@ -144,7 +151,7 @@ private:
 
 
 // Individual accessors
-const CoinParams& getBitcoinParams();
+const CoinParams& getBcoParams();
 const CoinParams& getTestnet3Params();
 const CoinParams& getLitecoinParams();
 const CoinParams& getLtcTestnet4Params();

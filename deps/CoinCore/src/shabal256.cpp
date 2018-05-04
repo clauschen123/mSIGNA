@@ -1,7 +1,7 @@
 #include "shabal256.h"
 
 extern "C" {
-#include "sph_shabal.h"
+#include "hashfunc/sph_shabal.h"
 }
 
 CShabal256::CShabal256()

@@ -22,11 +22,11 @@ namespace CoinQ
 
 NetworkSelector::NetworkSelector(const std::string& network_name)
 {
-    network_map_.insert(NetworkPair("bitcoin", getBitcoinParams()));
-    network_map_.insert(NetworkPair("testnet3", getTestnet3Params()));
-    network_map_.insert(NetworkPair("litecoin", getLitecoinParams()));
-    network_map_.insert(NetworkPair("ltctestnet4", getLtcTestnet4Params()));
-    network_map_.insert(NetworkPair("quarkcoin", getQuarkcoinParams()));
+    network_map_.insert(NetworkPair("bco", getBcoParams()));
+//     network_map_.insert(NetworkPair("testnet3", getTestnet3Params()));
+//     network_map_.insert(NetworkPair("litecoin", getLitecoinParams()));
+//     network_map_.insert(NetworkPair("ltctestnet4", getLtcTestnet4Params()));
+//     network_map_.insert(NetworkPair("quarkcoin", getQuarkcoinParams()));
 
     if (!network_name.empty()) { select(network_name); }
 }
@@ -66,7 +66,7 @@ void NetworkSelector::select(const std::string& network_name)
 
 
 // Coins can be added here
-const CoinParams bitcoinParams(
+const CoinParams bco_params(
     0xd9b4bef9ul,
     870015,  //70001,
     "8833",   //"8333",
@@ -76,10 +76,10 @@ const CoinParams bitcoinParams(
     4,
     10,
     128,
-    "Bitcoin",
-    "bitcoin",
+    "BCO",
+    "bco",
     100000000,
-    "BTC",
+    "BCO",
     21000000,
     100000,
     &sha256_2,
@@ -96,9 +96,17 @@ const CoinParams bitcoinParams(
         uchar_vector(32, 0),    //prevblock
         uchar_vector("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")    //merkleroot
     ),
+    {   
+//         "192.168.0.102",
+//         "spv.seed-bco.nanvann.top",
+//         "spv.seed-bco.bitcoinore.org",
+        "spv.seed0-bco.bitcoinore.org",
+//         "spv.seed1-bco.bitcoinore.org",
+//         "spv.seed2-bco.bitcoinore.org" 
+    },
     true
 );
-const CoinParams& getBitcoinParams() { return bitcoinParams; }
+const CoinParams& getBcoParams() { return bco_params; }
 
 const CoinParams testnet3Params(
     0x0709110bul,
@@ -127,6 +135,7 @@ const CoinParams testnet3Params(
         uchar_vector(32, 0),
         uchar_vector("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
     ),
+    {},
     true
 );
 const CoinParams& getTestnet3Params() { return testnet3Params; }
@@ -158,6 +167,7 @@ const CoinParams litecoinParams(
         uchar_vector(32, 0),
         uchar_vector("97ddfbbae6be97fd6cdf3e7ca13232a3afff2353e29badfab7f73011edd4ced9")
     ),
+    {},
     true
 );
 const CoinParams& getLitecoinParams() { return litecoinParams; }
@@ -188,7 +198,8 @@ const CoinParams ltcTestnet4Params(
         0, //plotseed
         uchar_vector(32, 0),
         uchar_vector("97ddfbbae6be97fd6cdf3e7ca13232a3afff2353e29badfab7f73011edd4ced9")
-    )
+    ),
+    {}
 );
 const CoinParams& getLtcTestnet4Params() { return ltcTestnet4Params; }
 
@@ -218,7 +229,8 @@ const CoinParams quarkcoinParams(
         0, //plotseed
         uchar_vector(32, 0),
         uchar_vector("868b2fb28cb1a0b881480cc85eb207e29e6ae75cdd6d26688ed34c2d2d23c776")
-    )
+    ),
+    {}
 );
 const CoinParams& getQuarkcoinParams() { return quarkcoinParams; }
 

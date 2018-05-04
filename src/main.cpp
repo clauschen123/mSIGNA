@@ -59,7 +59,7 @@ void selectNetwork(const std::string& networkName)
 
 void setCurrencyUnit()
 {
-    QSettings settings("Ciphrex", getDefaultSettings().getNetworkSettingsPath());
+    QSettings settings(APP_CORP_NAME, getDefaultSettings().getNetworkSettingsPath());
     QString prefix = settings.value("currencyunitprefix", "").toString();
     setCurrencyUnitPrefix(prefix);
 }
@@ -75,8 +75,8 @@ int main(int argc, char* argv[])
 #endif
 
     QApplication app(argc, argv);
-    app.setOrganizationName("Ciphrex");
-    app.setOrganizationDomain("ciphrex.com");
+    app.setOrganizationName(APP_CORP_NAME);
+    app.setOrganizationDomain("lianyu.com");
 
     // Check whether another instance is already running. If so, send it commands and exit.    
     CommandServer commandServer(&app);
@@ -172,7 +172,6 @@ int main(int argc, char* argv[])
     while (waiting) { usleep(200); }
     timer_io.stop();
 
-    mainWin.tryConnect();
     mainWin.show();
     splash.finish(&mainWin);
 
@@ -187,6 +186,8 @@ int main(int argc, char* argv[])
         mainWin.setLicenseAccepted(true);
         mainWin.saveSettings();
     }
+
+    mainWin.tryConnect();
 
     commandServer.uiReady();
 

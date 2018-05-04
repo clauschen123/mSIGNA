@@ -38,7 +38,7 @@ namespace CoinQ
 class BlockchainDownload
 {
 public:
-    BlockchainDownload(const CoinQ::CoinParams& coinParams = CoinQ::getBitcoinParams(), bool bCheckProofOfWork = false);
+    BlockchainDownload(const CoinQ::CoinParams& coinParams = CoinQ::getBcoParams(), bool bCheckProofOfWork = false);
     ~BlockchainDownload();
 
     void setCoinParams(const CoinQ::CoinParams& coinParams);

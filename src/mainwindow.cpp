@@ -33,6 +33,9 @@
 
 // Coin scripts
 #include <CoinQ/CoinQ_script.h>
+#include <CoinQ/CoinQ_coinparams.h>
+#include <CoinCore/ping.h>
+#include <CoinCore/netaddress.h>
 
 // Models/Views
 #include "accountmodel.h"
@@ -82,6 +85,7 @@
 #include <CoinDB/Passphrase.h>
 
 #include <typeinfo>
+#include <iostream>
 
 boost::mutex repaintMutex;
 
@@ -306,7 +310,7 @@ void MainWindow::loadVault()
 
 void MainWindow::tryConnect()
 {
-    if (!autoConnect) return;
+    //if (!autoConnect) return;
     startNetworkSync();
 }
 
@@ -374,7 +378,7 @@ void MainWindow::updateFonts(int fontSize)
     keychainView->updateColumns();
     txView->updateColumns();
             
-    QSettings settings("Ciphrex", getDefaultSettings().getSettingsRoot());
+    QSettings settings(APP_CORP_NAME, getDefaultSettings().getSettingsRoot());
     settings.setValue("fontsize", fontSize);
 }
 
@@ -407,10 +411,10 @@ void MainWindow::updateNetworkState(network_state_t newState)
             ;
         }
 
-        connectAction->setEnabled(!isConnected());
-        shortConnectAction->setEnabled(!isConnected());
-        disconnectAction->setEnabled(isConnected());
-        shortDisconnectAction->setEnabled(isConnected());
+//         connectAction->setEnabled(!isConnected());
+//         shortConnectAction->setEnabled(!isConnected());
+//         disconnectAction->setEnabled(isConnected());
+//         shortDisconnectAction->setEnabled(isConnected());
         sendRawTxAction->setEnabled(isConnected());
     }
 }
@@ -2034,14 +2038,43 @@ void MainWindow::connectionClosed()
     emit status(tr("Connection closed"));
 }
 
-void MainWindow::startNetworkSync()
+void MainWindow::startSeedDns()
 {
-    //connectAction->setEnabled(false);
     try {
-        QString message(tr("Connecting to ") + host + ":" + QString::number(port) + "...");
+        int found = 0;
+        const CoinQ::SeedParams& seeds = CoinQ::getBcoParams().get_seeds();
+        std::vector<net::CNetAddr> vIPs;
+        for (auto& seed : seeds) {
+            LOGGER(trace) << "Lookup Host: " << seed << endl;
+
+            if (net::LookupHost(seed.c_str(), vIPs, 0, true))
+            {
+                for (const net::CNetAddr& ip : vIPs)
+                {
+                    LOGGER(trace) << "  Find IP: " << ip.ToStringIP() << endl;
+                    found++;
+                }
+            }
+        }
+
+        int i = 0, selected = 0;
+        time_t pingVal = std::numeric_limits<time_t>::max();
+        for (net::CNetAddr& ip : vIPs) {
+            string hostStr = ip.ToStringIP();
+            LOGGER(trace) << "ping " << hostStr << " ..." << endl;
+            time_t thisPing = pinger(hostStr.c_str()).detect();
+            LOGGER(trace) << "ping " << hostStr << " result=" << thisPing / 1000 << "ms" << endl;
+
+            if (thisPing < pingVal)
+                selected = i;
+            ++i;
+        }
+
+        QString ip = QString::fromStdString(vIPs[selected].ToString());
+        QString message(tr("Connecting to ") + ip + ":" + QString::number(port) + "...");
         updateStatusMessage(message);
         //networkStarted();
-        synchedVault.startSync(host.toStdString(), port);
+        synchedVault.startSync(ip.toStdString(), port);
     }
     catch (const exception& e) {
         LOGGER(debug) << "MainWindow::startNetworkSync - " << e.what() << std::endl;
@@ -2049,10 +2082,16 @@ void MainWindow::startNetworkSync()
     }
 }
 
+void MainWindow::startNetworkSync()
+{
+    m_dnsThread = boost::thread(boost::bind(&MainWindow::startSeedDns,this));
+    LOGGER(trace) << "Dns thread started." << endl;
+}
+
 void MainWindow::stopNetworkSync()
 {
-    disconnectAction->setEnabled(false);
-    shortDisconnectAction->setEnabled(false);
+//     disconnectAction->setEnabled(false);
+//     shortDisconnectAction->setEnabled(false);
     try
     {
         updateStatusMessage(tr("Disconnecting..."));
@@ -2086,7 +2125,7 @@ void MainWindow::networkStarted()
 // TODO: put common state change operations into common functions
 void MainWindow::networkStopped()
 {
-    disconnectAction->setText(tr("Disconnect from ") + host);
+//     disconnectAction->setText(tr("Disconnect from ") + host);
     updateNetworkState(NETWORK_STATE_STOPPED);
     emit status(tr("Network stopped"));
 }
@@ -2104,12 +2143,12 @@ void MainWindow::networkSettings()
         host = dlg.getHost();
         port = dlg.getPort();
         autoConnect = dlg.getAutoConnect();
-        connectAction->setText(tr("Connect to ") + host);
+//         connectAction->setText(tr("Connect to ") + host);
         if (!isConnected()) {
-            disconnectAction->setText(tr("Disconnect from ") + host);
+//             disconnectAction->setText(tr("Disconnect from ") + host);
         }
 
-        QSettings settings("Ciphrex", getDefaultSettings().getNetworkSettingsPath());
+        QSettings settings(APP_CORP_NAME, getDefaultSettings().getNetworkSettingsPath());
         settings.setValue("host", host);
         settings.setValue("port", port);
     }
@@ -2407,31 +2446,31 @@ void MainWindow::createActions()
     connect(sendRawTxAction, SIGNAL(triggered()), this, SLOT(sendRawTx()));
 
     // network actions
-    connectAction = new QAction(QIcon(":/icons/connect.png"), tr("Connect To ") + host, this);
-    connectAction->setStatusTip(tr("Connect to a p2p node"));
-    connectAction->setEnabled(true);
+//     connectAction = new QAction(QIcon(":/icons/connect.png"), tr("Connect To ") + host, this);
+//     connectAction->setStatusTip(tr("Connect to a p2p node"));
+//     connectAction->setEnabled(true);
 
-    shortConnectAction = new QAction(QIcon(":/icons/connect.png"), tr("Connect"), this);
-    shortConnectAction->setStatusTip(tr("Connect to a p2p node"));
-    shortConnectAction->setEnabled(true);
+//     shortConnectAction = new QAction(QIcon(":/icons/connect.png"), tr("Connect"), this);
+//     shortConnectAction->setStatusTip(tr("Connect to a p2p node"));
+//     shortConnectAction->setEnabled(true);
+// 
+//     disconnectAction = new QAction(QIcon(":/icons/disconnect.png"), tr("Disconnect From ") + host, this);
+//     disconnectAction->setStatusTip(tr("Disconnect from p2p node"));
+//     disconnectAction->setEnabled(false);
 
-    disconnectAction = new QAction(QIcon(":/icons/disconnect.png"), tr("Disconnect From ") + host, this);
-    disconnectAction->setStatusTip(tr("Disconnect from p2p node"));
-    disconnectAction->setEnabled(false);
+//     shortDisconnectAction = new QAction(QIcon(":/icons/disconnect.png"), tr("Disconnect"), this);
+//     shortDisconnectAction->setStatusTip(tr("Disconnect from p2p node"));
+//     shortDisconnectAction->setEnabled(false);
 
-    shortDisconnectAction = new QAction(QIcon(":/icons/disconnect.png"), tr("Disconnect"), this);
-    shortDisconnectAction->setStatusTip(tr("Disconnect from p2p node"));
-    shortDisconnectAction->setEnabled(false);
+//     connect(connectAction, SIGNAL(triggered()), this, SLOT(startNetworkSync()));
+//     connect(shortConnectAction, SIGNAL(triggered()), this, SLOT(startNetworkSync()));
+//     connect(disconnectAction, SIGNAL(triggered()), this, SLOT(stopNetworkSync()));
+//     connect(shortDisconnectAction, SIGNAL(triggered()), this, SLOT(stopNetworkSync()));
 
-    connect(connectAction, SIGNAL(triggered()), this, SLOT(startNetworkSync()));
-    connect(shortConnectAction, SIGNAL(triggered()), this, SLOT(startNetworkSync()));
-    connect(disconnectAction, SIGNAL(triggered()), this, SLOT(stopNetworkSync()));
-    connect(shortDisconnectAction, SIGNAL(triggered()), this, SLOT(stopNetworkSync()));
-
-    networkSettingsAction = new QAction(tr("Settings..."), this);
-    networkSettingsAction->setStatusTip(tr("Configure network settings"));
-    networkSettingsAction->setEnabled(true);
-    connect(networkSettingsAction, SIGNAL(triggered()), this, SLOT(networkSettings()));
+//     networkSettingsAction = new QAction(tr("Settings..."), this);
+//     networkSettingsAction->setStatusTip(tr("Configure network settings"));
+//     networkSettingsAction->setEnabled(true);
+//     connect(networkSettingsAction, SIGNAL(triggered()), this, SLOT(networkSettings()));
 
     // font actions
     smallFontsAction = new QAction(tr("&Small"), this);
@@ -2569,13 +2608,13 @@ void MainWindow::createMenus()
     keychainMenu->addSeparator();
     keychainMenu->addAction(quickNewAccountAction);
 
-    networkMenu = menuBar()->addMenu(tr("&Network"));
-    networkMenu->addAction(connectAction);
-    networkMenu->addAction(disconnectAction);
-    networkMenu->addSeparator();
-    networkMenu->addAction(networkSettingsAction);
-
-    menuBar()->addSeparator();
+//     networkMenu = menuBar()->addMenu(tr("&Network"));
+//     networkMenu->addAction(connectAction);
+//     networkMenu->addAction(disconnectAction);
+//     networkMenu->addSeparator();
+//     networkMenu->addAction(networkSettingsAction);
+// 
+//     menuBar()->addSeparator();
 
     fontsMenu = menuBar()->addMenu(tr("Fonts"));
     fontsMenu->addSeparator()->setText(tr("Font Size"));
@@ -2625,10 +2664,10 @@ void MainWindow::createToolBars()
     keychainToolBar->addAction(newKeychainAction);
     keychainToolBar->addAction(quickNewAccountAction);
 
-    networkToolBar = addToolBar(tr("Network"));
-    networkToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    networkToolBar->addAction(shortConnectAction);
-    networkToolBar->addAction(shortDisconnectAction);
+//     networkToolBar = addToolBar(tr("Network"));
+//     networkToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+//     networkToolBar->addAction(shortConnectAction);
+//     networkToolBar->addAction(shortDisconnectAction);
 }
 
 void MainWindow::createStatusBar()
@@ -2652,7 +2691,7 @@ void MainWindow::createStatusBar()
 void MainWindow::loadSettings()
 {
     {
-        QSettings settings("Ciphrex", getDefaultSettings().getSettingsRoot());
+        QSettings settings(APP_CORP_NAME, getDefaultSettings().getSettingsRoot());
         QPoint pos = settings.value("pos", QPoint(200, 200)).toPoint();
         QSize size = settings.value("size", QSize(800, 400)).toSize();
         resize(size);
@@ -2664,7 +2703,7 @@ void MainWindow::loadSettings()
     }
 
     {
-        QSettings settings("Ciphrex", getDefaultSettings().getNetworkSettingsPath());
+        QSettings settings(APP_CORP_NAME, getDefaultSettings().getNetworkSettingsPath());
         currencyUnitPrefix = settings.value("currencyunitprefix", "").toString();
         showTrailingDecimals = settings.value("showtrailingdecimals", true).toBool();
         setTrailingDecimals(showTrailingDecimals);
@@ -2687,14 +2726,14 @@ void MainWindow::loadSettings()
 void MainWindow::saveSettings()
 {
     {
-        QSettings settings("Ciphrex", getDefaultSettings().getSettingsRoot());
+        QSettings settings(APP_CORP_NAME, getDefaultSettings().getSettingsRoot());
         settings.setValue("pos", pos());
         settings.setValue("size", size());
         settings.setValue("licenseaccepted", licenseAccepted);
     }
 
     {
-        QSettings settings("Ciphrex", getDefaultSettings().getNetworkSettingsPath());
+        QSettings settings(APP_CORP_NAME, getDefaultSettings().getNetworkSettingsPath());
         settings.setValue("currencyunitprefix", currencyUnitPrefix);
         settings.setValue("showtrailingdecimals", showTrailingDecimals);
         settings.setValue("blocktreefile", blockTreeFile);
@@ -2711,7 +2750,7 @@ void MainWindow::saveSettings()
 
 void MainWindow::clearSettings()
 {
-    QSettings settings("Ciphrex", getDefaultSettings().getSettingsRoot());
+    QSettings settings(APP_CORP_NAME, getDefaultSettings().getSettingsRoot());
     settings.clear();
     loadSettings();
 }
@@ -2731,7 +2770,7 @@ void MainWindow::addToRecents(const QString& fileName)
 
 void MainWindow::loadRecents()
 {
-    QSettings settings("Ciphrex", getDefaultSettings().getNetworkSettingsPath());
+    QSettings settings(APP_CORP_NAME, getDefaultSettings().getNetworkSettingsPath());
 
     recents.clear();
     int nRecents = settings.beginReadArray("recents");
@@ -2747,7 +2786,7 @@ void MainWindow::loadRecents()
 
 void MainWindow::saveRecents()
 {
-    QSettings settings("Ciphrex", getDefaultSettings().getNetworkSettingsPath());
+    QSettings settings(APP_CORP_NAME, getDefaultSettings().getNetworkSettingsPath());
 
     settings.beginWriteArray("recents");
     for (int i = 0; i < recents.size(); i++)

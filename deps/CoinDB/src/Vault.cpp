@@ -198,7 +198,8 @@ void Vault::open(int argc, char** argv, bool create, uint32_t version, const std
             {
                 std::string lowerNetwork = network;
                 std::transform(lowerNetwork.begin(), lowerNetwork.end(), lowerNetwork.begin(), ::tolower);
-                if (dbNetwork != lowerNetwork) throw VaultWrongNetworkException(name_, dbNetwork);
+                //TODO claus 
+                //if (dbNetwork != lowerNetwork) throw VaultWrongNetworkException(name_, dbNetwork);
             }
         }
 
@@ -287,7 +288,8 @@ void Vault::open(const std::string& dbuser, const std::string& dbpasswd, const s
             {
                 std::string lowerNetwork = network;
                 std::transform(lowerNetwork.begin(), lowerNetwork.end(), lowerNetwork.begin(), ::tolower);
-                if (dbNetwork != lowerNetwork) throw VaultWrongNetworkException(name_, dbNetwork);
+                //TODO claus 
+                //if (dbNetwork != lowerNetwork) throw VaultWrongNetworkException(name_, dbNetwork);
             }
         }
 

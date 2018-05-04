@@ -16,6 +16,8 @@
 #include <QDir>
 #include <QString>
 
+#define APP_CORP_NAME   "LianYu"
+
 class DefaultSettings
 {
 public:

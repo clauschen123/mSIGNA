@@ -14,6 +14,7 @@
 #include "acceptlicensedialog.h"
 #include "ui_acceptlicensedialog.h"
 
+//TODO claus
 AcceptLicenseDialog::AcceptLicenseDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::AcceptLicenseDialog)

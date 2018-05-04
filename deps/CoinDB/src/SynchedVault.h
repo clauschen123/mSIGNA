@@ -36,7 +36,7 @@ public:
 
     static const std::string getStatusString(status_t status);
 
-    SynchedVault(const CoinQ::CoinParams& coinParams = CoinQ::getBitcoinParams());
+    SynchedVault(const CoinQ::CoinParams& coinParams = CoinQ::getBcoParams());
     ~SynchedVault();
 
     const CoinQ::CoinParams& getCoinParams() const { return m_networkSync.getCoinParams(); }

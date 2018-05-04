@@ -15,7 +15,8 @@ OBJS = \
         obj/shabal256.o \
         obj/utilstrencodings.o \
         obj/arith_uint256.o \
-        obj/btc_uint256.o
+        obj/btc_uint256.o \
+        obj/netaddress.o
 
 OBJ_HEADERS = \
         src/Base58Check.h \
@@ -29,7 +30,8 @@ OBJ_HEADERS = \
         src/typedefs.h \
         src/uint256.h \
         src/btc_uint256.h \
-        src/arith_uint256.h 
+        src/arith_uint256.h \
+        src/ping.h
 
 SCRYPT_OBJS = \
 	src/scrypt/obj/scrypt.o

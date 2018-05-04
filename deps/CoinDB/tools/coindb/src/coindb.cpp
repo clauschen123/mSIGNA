@@ -36,7 +36,7 @@
 #include <boost/algorithm/string.hpp>
 
 const std::string COINDB_VERSION = "v0.8.0";
-const std::string DEFAULT_NETWORK = "bitcoin";
+const std::string DEFAULT_NETWORK = "bco";
 const bool USE_WITNESS_P2SH = true;
 
 using namespace std;
