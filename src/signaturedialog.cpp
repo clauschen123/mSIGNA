@@ -61,6 +61,11 @@ SignatureDialog::~SignatureDialog()
     delete m_actions;
 }
 
+bool SignatureDialog::SilentAddSignature()
+{
+    m_actions->AddSignature();
+}
+
 void SignatureDialog::updateTx()
 {
     updateKeychains();

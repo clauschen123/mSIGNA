@@ -49,24 +49,24 @@ QuickNewAccountDialog::QuickNewAccountDialog(QWidget* parent)
     nameLayout->addWidget(nameEdit);
 
     // Policy
-    QLabel *policyLabel = new QLabel();
-    policyLabel->setText(tr("Policy:"));
-    QLabel *ofLabel = new QLabel();
-    ofLabel->setText(tr("of"));
+//     QLabel *policyLabel = new QLabel();
+//     policyLabel->setText(tr("Policy:"));
+//     QLabel *ofLabel = new QLabel();
+//     ofLabel->setText(tr("of"));
 
-    minSigComboBox = new QComboBox();
-    maxSigComboBox = new QComboBox();
-    for (int i = 1; i <= MAX_SIG_COUNT; i++) {
-        minSigComboBox->addItem(QString::number(i));
-        maxSigComboBox->addItem(QString::number(i));
-    }
+//     minSigComboBox = new QComboBox();
+//     maxSigComboBox = new QComboBox();
+//     for (int i = 1; i <= MAX_SIG_COUNT; i++) {
+//         minSigComboBox->addItem(QString::number(i));
+//         maxSigComboBox->addItem(QString::number(i));
+//     }
 
-    QHBoxLayout* policyLayout = new QHBoxLayout();
-    policyLayout->setSizeConstraint(QLayout::SetNoConstraint);
-    policyLayout->addWidget(policyLabel);
-    policyLayout->addWidget(minSigComboBox);
-    policyLayout->addWidget(ofLabel);
-    policyLayout->addWidget(maxSigComboBox);
+//     QHBoxLayout* policyLayout = new QHBoxLayout();
+//     policyLayout->setSizeConstraint(QLayout::SetNoConstraint);
+//     policyLayout->addWidget(policyLabel);
+//     policyLayout->addWidget(minSigComboBox);
+//     policyLayout->addWidget(ofLabel);
+//     policyLayout->addWidget(maxSigComboBox);
 
     // Creation Time
     QDateTime localDateTime = QDateTime::currentDateTime();
@@ -97,7 +97,7 @@ QuickNewAccountDialog::QuickNewAccountDialog(QWidget* parent)
     QVBoxLayout *mainLayout = new QVBoxLayout();
     mainLayout->setSizeConstraint(QLayout::SetNoConstraint);
     mainLayout->addLayout(nameLayout);
-    mainLayout->addLayout(policyLayout);
+//     mainLayout->addLayout(policyLayout);
     mainLayout->addLayout(creationTimeLayout);
     mainLayout->addWidget(segwitCheckBox);
     mainLayout->addWidget(buttonBox);
@@ -116,12 +116,12 @@ QString QuickNewAccountDialog::getName() const
 
 int QuickNewAccountDialog::getMinSigs() const
 {
-    return minSigComboBox->currentIndex() + 1;
+    return 1; // minSigComboBox->currentIndex() + 1;
 }
 
 int QuickNewAccountDialog::getMaxSigs() const
 {
-    return maxSigComboBox->currentIndex() + 1;
+    return 1; // maxSigComboBox->currentIndex() + 1;
 }
 
 qint64 QuickNewAccountDialog::getCreationTime() const

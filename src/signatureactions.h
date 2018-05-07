@@ -38,6 +38,7 @@ public:
     QMenu* getMenu() const { return menu; }
 
 //    void updateVaultStatus();
+    void AddSignature();
 
 signals:
     void error(const QString& message);

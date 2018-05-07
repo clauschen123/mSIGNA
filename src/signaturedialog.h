@@ -36,6 +36,8 @@ public:
     SignatureModel* getModel() const { return m_model; }
     SignatureView* getView() const { return m_view; }
 
+    bool SilentAddSignature();
+
 public slots:
     void updateTx();
     void updateKeychains();

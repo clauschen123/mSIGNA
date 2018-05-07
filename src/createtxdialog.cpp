@@ -219,14 +219,14 @@ CreateTxDialog::CreateTxDialog(CoinDB::Vault* vault, const QString& accountName,
     defaultFee = getDefaultFee(); // getCoinParams().default_fee();
 
     // Buttons
-    signButton = new QPushButton(tr("Sign"));
-    saveButton = new QPushButton(tr("Save Unsigned"));
+    signButton = new QPushButton(tr("OK"));//"Sign"
+//     saveButton = new QPushButton(tr("Save Unsigned"));
     cancelButton = new QPushButton(tr("Cancel"));
     cancelButton->setDefault(true);
 
     QDialogButtonBox* buttonBox = new QDialogButtonBox;
     buttonBox->addButton(signButton, QDialogButtonBox::ActionRole);
-    buttonBox->addButton(saveButton, QDialogButtonBox::AcceptRole);
+//     buttonBox->addButton(saveButton, QDialogButtonBox::AcceptRole);
     buttonBox->addButton(cancelButton, QDialogButtonBox::RejectRole);
 
     connect(signButton, &QPushButton::clicked, [this]() { status = SIGN; accept(); });

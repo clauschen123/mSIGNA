@@ -308,7 +308,7 @@ private:
 //     QAction* closeVaultAction;
 
     // keychain actions
-    QAction* newKeychainAction;
+//     QAction* newKeychainAction;
     QAction* unlockKeychainAction;
     QAction* lockKeychainAction;
     QAction* lockAllKeychainsAction;
@@ -329,7 +329,7 @@ private:
 
     // account actions
     QAction* quickNewAccountAction;
-    QAction* newAccountAction;
+//     QAction* newAccountAction;
     QAction* importAccountAction;
     QAction* exportAccountAction;
     QAction* exportSharedAccountAction;

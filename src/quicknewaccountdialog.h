@@ -37,8 +37,8 @@ public:
 
 private:
     QLineEdit* nameEdit;
-    QComboBox* minSigComboBox;
-    QComboBox* maxSigComboBox;
+//     QComboBox* minSigComboBox;
+//     QComboBox* maxSigComboBox;
     QDateTimeEdit* creationTimeEdit;
     QCalendarWidget* calendarWidget;
     QCheckBox* segwitCheckBox;

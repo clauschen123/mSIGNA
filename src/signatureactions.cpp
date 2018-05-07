@@ -48,6 +48,13 @@ SignatureActions::~SignatureActions()
     delete menu;
 }
 
+void SignatureActions::AddSignature()
+{
+    m_currentRow = 0;
+    refreshCurrentKeychain();
+    addSignature();
+}
+
 void SignatureActions::updateCurrentKeychain(const QModelIndex& current, const QModelIndex& /*previous*/)
 {
     m_currentRow = current.row();
@@ -116,9 +123,9 @@ void SignatureActions::addSignature()
             throw;
         }
 
-LOGGER(debug) << "calling lockKeychain()" << std::endl;
+        LOGGER(debug) << "calling lockKeychain()" << std::endl;
         if (bKeychainLocked) lockKeychain(); // Relock keychain if it was locked prior to adding this signature.
-LOGGER(debug) << "lockKeychain() returned" << std::endl;
+        LOGGER(debug) << "lockKeychain() returned" << std::endl;
 
         if (keychainNames.empty())
         {

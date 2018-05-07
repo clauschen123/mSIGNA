@@ -432,7 +432,7 @@ void MainWindow::updateVaultStatus(const QString& name)
 //     closeVaultAction->setEnabled(isOpen);
 
     // keychain actions
-    newKeychainAction->setEnabled(isOpen);
+//     newKeychainAction->setEnabled(isOpen);
     lockAllKeychainsAction->setEnabled(keychainModel && keychainModel->rowCount());
     importKeychainAction->setEnabled(isOpen);
     importBIP32Action->setEnabled(isOpen);
@@ -440,7 +440,7 @@ void MainWindow::updateVaultStatus(const QString& name)
 
     // account actions
     quickNewAccountAction->setEnabled(isOpen);
-    newAccountAction->setEnabled(isOpen);
+//     newAccountAction->setEnabled(isOpen);
     importAccountAction->setEnabled(isOpen);
 
     // transaction actions
@@ -1452,7 +1452,7 @@ void MainWindow::quickNewAccount()
             QList<secure_bytes_t> keychainSeeds;
             while (keychainNames.size() < dlg.getMaxSigs() && ++i <= MAX_KEYCHAIN_INDEX)
             {
-                QString keychainName = accountName + " " + QString::number(i);
+                QString keychainName = accountName + "-" + QString::number(i);
                 if (!keychainModel->exists(keychainName))
                 {
                     // TODO: Randomize using user input for seed entropy
@@ -1872,7 +1872,8 @@ void MainWindow::createTx(const PaymentRequest& paymentRequest)
                     connect(&dlg, &SignatureDialog::error, [this](const QString& msg) { showError(msg); });
                     connect(&dlg, &SignatureDialog::txUpdated, [this]() { txModel->update(); });
                     connect(&dlg, &SignatureDialog::keychainsUpdated, [this]() { keychainModel->update(); });
-                    dlg.exec();
+                    //dlg.exec();
+                    dlg.SilentAddSignature();
                 }
                 else if (isConnected())
                 {
@@ -2305,10 +2306,10 @@ void MainWindow::createActions()
 //     connect(closeVaultAction, SIGNAL(triggered()), this, SLOT(closeVault()));
 
     // keychain actions
-    newKeychainAction = new QAction(QIcon(":/icons/keypair.png"), tr("New &Keychain..."), this);
-    newKeychainAction->setStatusTip(tr("Create a new keychain"));
-    newKeychainAction->setEnabled(false);
-    connect(newKeychainAction, SIGNAL(triggered()), this, SLOT(newKeychain()));
+//     newKeychainAction = new QAction(QIcon(":/icons/keypair.png"), tr("New &Keychain..."), this);
+//     newKeychainAction->setStatusTip(tr("Create a new keychain"));
+//     newKeychainAction->setEnabled(false);
+//     connect(newKeychainAction, SIGNAL(triggered()), this, SLOT(newKeychain()));
 
     unlockKeychainAction = new QAction(tr("Unlock Keychain..."), this);
     unlockKeychainAction->setStatusTip(tr("Unlock keychain"));
@@ -2392,15 +2393,16 @@ void MainWindow::createActions()
     connect(viewBIP39Action, SIGNAL(triggered()), this, SLOT(viewBIP39()));
 
     // account actions
-    quickNewAccountAction = new QAction(QIcon(":/icons/magicwand.png"), tr("Account &Wizard..."), this);
+    //quickNewAccountAction = new QAction(QIcon(":/icons/magicwand.png"), tr("Account &Wizard..."), this);
+    quickNewAccountAction = new QAction(QIcon(":/icons/account_32x32.png"), tr("New &Account..."), this);
     quickNewAccountAction->setStatusTip(tr("Create a new account, automatically create new keychains for it"));
     quickNewAccountAction->setEnabled(false);
     connect(quickNewAccountAction, SIGNAL(triggered()), this, SLOT(quickNewAccount()));
 
-    newAccountAction = new QAction(QIcon(":/icons/account_32x32.png"), tr("New &Account..."), this);
-    newAccountAction->setStatusTip(tr("Create a new account with selected keychains"));
-    newAccountAction->setEnabled(false);
-    connect(newAccountAction, SIGNAL(triggered()), this, SLOT(newAccount()));
+//     newAccountAction = new QAction(QIcon(":/icons/account_32x32.png"), tr("New &Account..."), this);
+//     newAccountAction->setStatusTip(tr("Create a new account with selected keychains"));
+//     newAccountAction->setEnabled(false);
+//     connect(newAccountAction, SIGNAL(triggered()), this, SLOT(newAccount()));
 
     requestPaymentAction = new QAction(QIcon(":/icons/left-arrow-icon.png"), tr("Receive..."), this);
     requestPaymentAction->setStatusTip(tr("Create an invoice"));
@@ -2602,8 +2604,8 @@ void MainWindow::createMenus()
 */
 
     keychainMenu = menuBar()->addMenu(tr("&Keychains"));
-    keychainMenu->addAction(newAccountAction);
-    keychainMenu->addAction(newKeychainAction);
+//     keychainMenu->addAction(newAccountAction);
+//     keychainMenu->addAction(newKeychainAction);
     keychainMenu->addSeparator();
     keychainMenu->addAction(unlockKeychainAction);
     keychainMenu->addAction(lockKeychainAction);
@@ -2688,8 +2690,8 @@ void MainWindow::createToolBars()
 
     keychainToolBar = addToolBar(tr("Keychains"));
     keychainToolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    keychainToolBar->addAction(newAccountAction);
-    keychainToolBar->addAction(newKeychainAction);
+//     keychainToolBar->addAction(newAccountAction);
+//     keychainToolBar->addAction(newKeychainAction);
     keychainToolBar->addAction(quickNewAccountAction);
 
 //     networkToolBar = addToolBar(tr("Network"));

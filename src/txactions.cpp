@@ -169,7 +169,8 @@ void TxActions::showSignatureDialog()
             connect(&dlg, &SignatureDialog::keychainsUpdated, [this]() { m_keychainModel->update(); });
         }
 
-        dlg.exec();
+        dlg.SilentAddSignature();
+        //dlg.exec();
     }
     catch (const std::exception& e)
     {

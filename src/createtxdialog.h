@@ -129,7 +129,7 @@ private:
     std::set<TxOutLayout*> txOutLayouts;
 
     QPushButton* signButton;
-    QPushButton* saveButton;
+//     QPushButton* saveButton;
     QPushButton* cancelButton;
 
     status_t status;
